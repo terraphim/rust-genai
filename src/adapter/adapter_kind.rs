@@ -152,8 +152,8 @@ impl AdapterKind {
 			AdapterKind::Ollama => None,
 			AdapterKind::Cerebras => Some(CerebrasAdapter::API_KEY_DEFAULT_ENV_NAME),
 			AdapterKind::ZAi => Some(ZAiAdapter::API_KEY_DEFAULT_ENV_NAME),
-			// Bedrock uses AWS credentials, not a single API key
-			AdapterKind::Bedrock => Some(BedrockAdapter::AWS_ACCESS_KEY_ID_ENV),
+			// Bedrock uses Bearer token authentication
+			AdapterKind::Bedrock => Some(BedrockAdapter::API_KEY_ENV),
 		}
 	}
 }

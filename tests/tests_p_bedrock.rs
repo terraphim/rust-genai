@@ -1,8 +1,7 @@
 //! AWS Bedrock integration tests
 //!
-//! These tests require AWS credentials to be set:
-//! - AWS_ACCESS_KEY_ID
-//! - AWS_SECRET_ACCESS_KEY
+//! These tests require the AWS Bedrock API key to be set:
+//! - AWS_BEARER_TOKEN_BEDROCK (Bearer token API key)
 //! - AWS_REGION (optional, defaults to us-east-1)
 //!
 //! To run these tests:
@@ -21,9 +20,9 @@ use serial_test::serial;
 const MODEL: &str = "anthropic.claude-3-5-haiku-20241022-v1:0";
 const MODEL_NS: &str = "bedrock::anthropic.claude-3-5-haiku-20241022-v1:0";
 
-// Helper to check if AWS credentials are set
+// Helper to check if AWS Bedrock API key is set
 fn has_aws_credentials() -> bool {
-	std::env::var("AWS_ACCESS_KEY_ID").is_ok() && std::env::var("AWS_SECRET_ACCESS_KEY").is_ok()
+	std::env::var("AWS_BEARER_TOKEN_BEDROCK").is_ok()
 }
 
 // region:    --- Basic Chat Tests
@@ -32,7 +31,7 @@ fn has_aws_credentials() -> bool {
 #[serial(bedrock)]
 async fn test_bedrock_chat_simple_ok() -> TestResult<()> {
 	if !has_aws_credentials() {
-		println!("Skipping Bedrock test - AWS credentials not set");
+		println!("Skipping Bedrock test - AWS_BEARER_TOKEN_BEDROCK not set");
 		return Ok(());
 	}
 	common_tests::common_test_chat_simple_ok(MODEL_NS, None).await
@@ -42,7 +41,7 @@ async fn test_bedrock_chat_simple_ok() -> TestResult<()> {
 #[serial(bedrock)]
 async fn test_bedrock_chat_temperature_ok() -> TestResult<()> {
 	if !has_aws_credentials() {
-		println!("Skipping Bedrock test - AWS credentials not set");
+		println!("Skipping Bedrock test - AWS_BEARER_TOKEN_BEDROCK not set");
 		return Ok(());
 	}
 	common_tests::common_test_chat_temperature_ok(MODEL_NS).await
@@ -52,7 +51,7 @@ async fn test_bedrock_chat_temperature_ok() -> TestResult<()> {
 #[serial(bedrock)]
 async fn test_bedrock_chat_multi_system_ok() -> TestResult<()> {
 	if !has_aws_credentials() {
-		println!("Skipping Bedrock test - AWS credentials not set");
+		println!("Skipping Bedrock test - AWS_BEARER_TOKEN_BEDROCK not set");
 		return Ok(());
 	}
 	common_tests::common_test_chat_multi_system_ok(MODEL_NS).await
@@ -66,7 +65,7 @@ async fn test_bedrock_chat_multi_system_ok() -> TestResult<()> {
 #[serial(bedrock)]
 async fn test_bedrock_chat_stream_simple_ok() -> TestResult<()> {
 	if !has_aws_credentials() {
-		println!("Skipping Bedrock test - AWS credentials not set");
+		println!("Skipping Bedrock test - AWS_BEARER_TOKEN_BEDROCK not set");
 		return Ok(());
 	}
 	common_tests::common_test_chat_stream_simple_ok(MODEL_NS, None).await
@@ -76,7 +75,7 @@ async fn test_bedrock_chat_stream_simple_ok() -> TestResult<()> {
 #[serial(bedrock)]
 async fn test_bedrock_chat_stream_capture_content_ok() -> TestResult<()> {
 	if !has_aws_credentials() {
-		println!("Skipping Bedrock test - AWS credentials not set");
+		println!("Skipping Bedrock test - AWS_BEARER_TOKEN_BEDROCK not set");
 		return Ok(());
 	}
 	common_tests::common_test_chat_stream_capture_content_ok(MODEL_NS).await
@@ -90,7 +89,7 @@ async fn test_bedrock_chat_stream_capture_content_ok() -> TestResult<()> {
 #[serial(bedrock)]
 async fn test_bedrock_tool_simple_ok() -> TestResult<()> {
 	if !has_aws_credentials() {
-		println!("Skipping Bedrock test - AWS credentials not set");
+		println!("Skipping Bedrock test - AWS_BEARER_TOKEN_BEDROCK not set");
 		return Ok(());
 	}
 	common_tests::common_test_tool_simple_ok(MODEL_NS).await
@@ -114,7 +113,7 @@ async fn test_bedrock_list_models() -> TestResult<()> {
 #[serial(bedrock)]
 async fn test_bedrock_basic_chat() -> TestResult<()> {
 	if !has_aws_credentials() {
-		println!("Skipping Bedrock test - AWS credentials not set");
+		println!("Skipping Bedrock test - AWS_BEARER_TOKEN_BEDROCK not set");
 		return Ok(());
 	}
 
@@ -138,7 +137,7 @@ async fn test_bedrock_basic_chat() -> TestResult<()> {
 #[serial(bedrock)]
 async fn test_bedrock_streaming_chat() -> TestResult<()> {
 	if !has_aws_credentials() {
-		println!("Skipping Bedrock test - AWS credentials not set");
+		println!("Skipping Bedrock test - AWS_BEARER_TOKEN_BEDROCK not set");
 		return Ok(());
 	}
 
@@ -162,7 +161,7 @@ async fn test_bedrock_streaming_chat() -> TestResult<()> {
 #[serial(bedrock)]
 async fn test_bedrock_tool_calling() -> TestResult<()> {
 	if !has_aws_credentials() {
-		println!("Skipping Bedrock test - AWS credentials not set");
+		println!("Skipping Bedrock test - AWS_BEARER_TOKEN_BEDROCK not set");
 		return Ok(());
 	}
 
@@ -199,7 +198,7 @@ async fn test_bedrock_tool_calling() -> TestResult<()> {
 #[serial(bedrock)]
 async fn test_bedrock_llama_model() -> TestResult<()> {
 	if !has_aws_credentials() {
-		println!("Skipping Bedrock test - AWS credentials not set");
+		println!("Skipping Bedrock test - AWS_BEARER_TOKEN_BEDROCK not set");
 		return Ok(());
 	}
 

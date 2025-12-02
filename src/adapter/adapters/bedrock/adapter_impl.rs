@@ -1,9 +1,10 @@
 //! AWS Bedrock Adapter Implementation
 //!
 //! Implements the Adapter trait for AWS Bedrock's Converse API.
+//! Uses Bearer token authentication with AWS Bedrock API keys.
 
-use crate::adapter::adapters::bedrock::aws_auth::{AwsCredentials, AwsSigV4Signer};
 use crate::adapter::adapters::bedrock::streamer::BedrockStreamer;
+use crate::adapter::adapters::support::get_api_key;
 use crate::adapter::{Adapter, AdapterKind, ServiceType, WebRequestData};
 use crate::chat::{
 	Binary, BinarySource, ChatOptionsSet, ChatRequest, ChatResponse, ChatRole, ChatStream, ChatStreamResponse,
@@ -15,7 +16,6 @@ use crate::{Error, Headers, ModelIden, Result, ServiceTarget};
 use reqwest::RequestBuilder;
 use reqwest_eventsource::EventSource;
 use serde_json::{Value, json};
-use std::collections::BTreeMap;
 use tracing::warn;
 use value_ext::JsonValueExt;
 
@@ -61,10 +61,9 @@ const DEFAULT_MAX_TOKENS: u32 = 4096;
 pub struct BedrockAdapter;
 
 impl BedrockAdapter {
-	/// Environment variable names for AWS credentials
-	pub const AWS_ACCESS_KEY_ID_ENV: &str = "AWS_ACCESS_KEY_ID";
-	pub const AWS_SECRET_ACCESS_KEY_ENV: &str = "AWS_SECRET_ACCESS_KEY";
-	pub const AWS_SESSION_TOKEN_ENV: &str = "AWS_SESSION_TOKEN";
+	/// Environment variable name for AWS Bedrock API key (Bearer token)
+	pub const API_KEY_ENV: &str = "AWS_BEARER_TOKEN_BEDROCK";
+	/// Environment variable for AWS region
 	pub const AWS_REGION_ENV: &str = "AWS_REGION";
 
 	/// Get the AWS region from environment or default
@@ -75,18 +74,6 @@ impl BedrockAdapter {
 	/// Build the Bedrock endpoint URL for the given region
 	fn build_endpoint(region: &str) -> String {
 		format!("https://bedrock-runtime.{}.amazonaws.com/", region)
-	}
-
-	/// Sign a request using AWS SigV4
-	fn sign_request(
-		method: &str,
-		url: &str,
-		headers: &BTreeMap<String, String>,
-		payload: &[u8],
-	) -> Result<BTreeMap<String, String>> {
-		let credentials = AwsCredentials::from_env()?;
-		let signer = AwsSigV4Signer::new(credentials);
-		signer.sign_request(method, url, headers, payload)
 	}
 
 	/// Convert Usage from Bedrock format
@@ -284,9 +271,8 @@ impl Adapter for BedrockAdapter {
 	}
 
 	fn default_auth() -> AuthData {
-		// For Bedrock, we use AWS credentials from environment
-		// The AuthData here is a placeholder; actual auth is done via SigV4
-		AuthData::from_env(Self::AWS_ACCESS_KEY_ID_ENV)
+		// Bedrock uses Bearer token authentication
+		AuthData::from_env(Self::API_KEY_ENV)
 	}
 
 	async fn all_model_names(_kind: AdapterKind) -> Result<Vec<String>> {
@@ -320,10 +306,19 @@ impl Adapter for BedrockAdapter {
 		chat_req: ChatRequest,
 		options_set: ChatOptionsSet<'_, '_>,
 	) -> Result<WebRequestData> {
-		let ServiceTarget { endpoint, model, .. } = target;
+		let ServiceTarget { endpoint, auth, model } = target;
+
+		// Get API key (Bearer token)
+		let api_key = get_api_key(auth, &model)?;
 
 		// Get the URL
 		let url = Self::get_service_url(&model, service_type, endpoint)?;
+
+		// Build headers with Bearer token authentication
+		let headers = Headers::from(vec![
+			("Authorization".to_string(), format!("Bearer {}", api_key)),
+			("Content-Type".to_string(), "application/json".to_string()),
+		]);
 
 		// Convert chat request to Bedrock format
 		let BedrockRequestParts {
@@ -375,21 +370,6 @@ impl Adapter for BedrockAdapter {
 		}
 
 		payload.x_insert("inferenceConfig", inference_config)?;
-
-		// Serialize payload
-		let payload_bytes =
-			serde_json::to_vec(&payload).map_err(|e| Error::Internal(format!("Failed to serialize payload: {}", e)))?;
-
-		// Build initial headers
-		let mut headers_map = BTreeMap::new();
-		headers_map.insert("content-type".to_string(), "application/json".to_string());
-		headers_map.insert("accept".to_string(), "application/json".to_string());
-
-		// Sign the request
-		let signed_headers = Self::sign_request("POST", &url, &headers_map, &payload_bytes)?;
-
-		// Convert to Headers
-		let headers = Headers::from(signed_headers.into_iter().map(|(k, v)| (k, v)).collect::<Vec<_>>());
 
 		Ok(WebRequestData { url, headers, payload })
 	}

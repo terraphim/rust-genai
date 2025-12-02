@@ -4,6 +4,10 @@
 //! Converse API: https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_Converse.html
 //! ConverseStream API: https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_ConverseStream.html
 //!
+//! Authentication:
+//! Uses Bearer token authentication with AWS Bedrock API keys.
+//! See: https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys-use.html
+//!
 //! Supported Models:
 //! - anthropic.claude-3-5-sonnet-20241022-v2:0
 //! - anthropic.claude-3-5-haiku-20241022-v1:0
@@ -20,13 +24,10 @@
 //! - cohere.command-r-v1:0
 //!
 //! Environment Variables:
-//! - AWS_ACCESS_KEY_ID: AWS Access Key ID
-//! - AWS_SECRET_ACCESS_KEY: AWS Secret Access Key
-//! - AWS_SESSION_TOKEN: (Optional) AWS Session Token for temporary credentials
+//! - AWS_BEARER_TOKEN_BEDROCK: AWS Bedrock API key (Bearer token)
 //! - AWS_REGION: AWS Region (default: us-east-1)
 
 mod adapter_impl;
-mod aws_auth;
 mod streamer;
 
 pub use adapter_impl::*;
