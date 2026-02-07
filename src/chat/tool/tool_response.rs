@@ -21,6 +21,17 @@ impl ToolResponse {
 	}
 }
 
+/// Computed accessors
+impl ToolResponse {
+	/// Returns an approximate in-memory size of this `ToolResponse`, in bytes,
+	/// computed as the sum of the UTF-8 lengths of:
+	/// - `call_id`
+	/// - `content`
+	pub fn size(&self) -> usize {
+		self.call_id.len() + self.content.len()
+	}
+}
+
 /// Getters
 #[allow(unused)]
 impl ToolResponse {
@@ -30,14 +41,5 @@ impl ToolResponse {
 
 	fn content(&self) -> &str {
 		&self.content
-	}
-}
-
-/// Computed accessors
-impl ToolResponse {
-	/// Returns an approximate in-memory size of this `ToolResponse`, in bytes,
-	/// computed as the sum of the UTF-8 lengths of `call_id` and `content`.
-	pub fn size(&self) -> usize {
-		self.call_id.len() + self.content.len()
 	}
 }
