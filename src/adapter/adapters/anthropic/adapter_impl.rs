@@ -97,19 +97,25 @@ impl Adapter for AnthropicAdapter {
 	) -> Result<WebRequestData> {
 		let ServiceTarget { endpoint, auth, model } = target;
 
-		// -- api_key
-		let api_key = get_api_key(auth, &model)?;
-
 		// -- url
 		let url = Self::get_service_url(&model, service_type, endpoint)?;
 
-		// -- headers
-		let headers = Headers::from(vec![
-			// headers
-			("x-api-key".to_string(), api_key),
-			("anthropic-beta".to_string(), "effort-2025-11-24".to_string()),
-			("anthropic-version".to_string(), ANTHROPIC_VERSION.to_string()),
-		]);
+		// -- headers (Bearer token uses Authorization header, otherwise x-api-key)
+		let headers = match &auth {
+			AuthData::BearerToken(token) => Headers::from(vec![
+				("Authorization".to_string(), format!("Bearer {}", token)),
+				("anthropic-beta".to_string(), "effort-2025-11-24".to_string()),
+				("anthropic-version".to_string(), ANTHROPIC_VERSION.to_string()),
+			]),
+			_ => {
+				let api_key = get_api_key(auth, &model)?;
+				Headers::from(vec![
+					("x-api-key".to_string(), api_key),
+					("anthropic-beta".to_string(), "effort-2025-11-24".to_string()),
+					("anthropic-version".to_string(), ANTHROPIC_VERSION.to_string()),
+				])
+			}
+		};
 
 		// -- Parts
 		let AnthropicRequestParts {
