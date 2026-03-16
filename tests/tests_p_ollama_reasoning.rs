@@ -148,7 +148,7 @@ async fn test_chat_stream_non_empty_chunk_deepseek_ok() -> TestResult<()> {
 // /// COMMENTED FOR NOW AS OLLAMA OpenAI Compatibility Layer does not support
 // /// usage tokens when streaming. See https://github.com/ollama/ollama/issues/4448
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_stream_capture_all_ok(MODEL).await
 // }

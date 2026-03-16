@@ -23,7 +23,7 @@ async fn test_chat_multi_system_ok() -> TestResult<()> {
 
 /// NOTE: deepseek-reasonner does not support Json Output (2025-01-21)
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_json_mode_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_json_mode_ok(MODEL, true).await
 // }

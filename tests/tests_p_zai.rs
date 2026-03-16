@@ -36,7 +36,7 @@ async fn test_chat_json_mode_ok() -> TestResult<()> {
 
 /// NOTE - Disable for now, not supported by Zhipu as of 2025-07-08
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_json_structured_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_json_structured_ok(MODEL, Some(Check::USAGE)).await
 // }
@@ -48,7 +48,7 @@ async fn test_chat_temperature_ok() -> TestResult<()> {
 
 /// NOTE - Disabled for now, as the model currently includes the stop sequences as the last sequences in the generation as of 2025-07-08.
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_stop_sequences_ok(MODEL).await
 // }
@@ -56,7 +56,7 @@ async fn test_chat_temperature_ok() -> TestResult<()> {
 // region:    --- Chat Implicit Cache
 /// NOTE - Disable for now, not supported by Zhipu as of 2025-07-08
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_cache_implicit_simple_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_cache_implicit_simple_ok(MODEL).await
 // }

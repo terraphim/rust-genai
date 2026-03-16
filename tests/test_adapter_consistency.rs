@@ -3,7 +3,7 @@
 //!
 //! NOTE: Since upstream v0.6.0-beta.8, DeepSeek, Groq, and ZAI no longer have static
 //! model lists -- they use dynamic API-based model discovery. Only fork adapters that
-//! still use static lists are checked here (Bedrock, Cerebras, Zhipu).
+//! still use static lists are checked here (Bedrock, Cerebras, Zhipu, Aliyun).
 
 use std::collections::HashMap;
 
@@ -75,6 +75,13 @@ fn read_adapter_models() -> HashMap<String, Vec<String>> {
 		&& let Some(model_list) = extract_model_array(&content, "pub(in crate::adapter) const MODELS: &[&str] = &[")
 	{
 		models.insert("Zhipu".to_string(), model_list);
+	}
+
+	// Aliyun models
+	if let Ok(content) = std::fs::read_to_string(base_path.join("src/adapter/adapters/aliyun/adapter_impl.rs"))
+		&& let Some(model_list) = extract_model_array(&content, "pub const MODELS: &[&str] = &[")
+	{
+		models.insert("Aliyun".to_string(), model_list);
 	}
 
 	models
@@ -151,6 +158,37 @@ fn get_expected_models() -> std::collections::HashMap<String, Vec<String>> {
 			"glm-4.1v-thinking-flash".to_string(),
 			"glm-4.1v-thinking-flashx".to_string(),
 			"glm-4.5".to_string(),
+		],
+	);
+
+	// Aliyun models
+	expected.insert(
+		"Aliyun".to_string(),
+		vec![
+			"qwen-turbo".to_string(),
+			"qwen-plus".to_string(),
+			"qwen-max".to_string(),
+			"qwen-max-longcontext".to_string(),
+			"qwen-turbo-latest".to_string(),
+			"qwen-plus-latest".to_string(),
+			"qwen-max-latest".to_string(),
+			"qwen-vl-plus".to_string(),
+			"qwen-vl-max".to_string(),
+			"qwen-vl-plus-latest".to_string(),
+			"qwen-7b-chat".to_string(),
+			"qwen-14b-chat".to_string(),
+			"qwen-72b-chat".to_string(),
+			"qwen-72b-chat-int4".to_string(),
+			"qwen-math-plus".to_string(),
+			"qwen-math-turbo".to_string(),
+			"qwen-math-plus-latest".to_string(),
+			"qwen-math-turbo-latest".to_string(),
+			"qwen-audio-turbo".to_string(),
+			"qwen-audio-plus".to_string(),
+			"qwen-audio-chat-v1".to_string(),
+			"qwen-coder-plus".to_string(),
+			"qwen-coder-turbo".to_string(),
+			"qwen-coder-latest".to_string(),
 		],
 	);
 

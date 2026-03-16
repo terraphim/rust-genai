@@ -66,14 +66,14 @@ async fn test_chat_json_structured_ok() -> TestResult<()> {
 
 /// NOTE - Temprature not supported for gpt-5
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_temperature_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_temperature_ok(MODEL).await
 // }
 //
 /// NOTE - Stop sequence does not need to be supported
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_stop_sequences_ok(MODEL).await
 // }

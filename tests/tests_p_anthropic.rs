@@ -65,7 +65,7 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 /// TODO: Fix/Workaround - This test for "claude-3-7-sonnet-latest" (works for other models)
 /// NOTE: This doe snot work anymore
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // #[serial(anthropic)]
 // async fn test_chat_json_mode_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_json_mode_ok(MODEL_THINKING, Some(Check::USAGE)).await
@@ -137,7 +137,7 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 
 // Anthropic does not support image URL
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_image_url_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_url_ok(MODEL).await
 // }

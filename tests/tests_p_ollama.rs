@@ -69,7 +69,7 @@ async fn test_chat_stream_capture_content_ok() -> TestResult<()> {
 // /// COMMENTED FOR NOW AS OLLAMA OpenAI Compatibility Layer does not support
 // /// usage tokens when streaming. See https://github.com/ollama/ollama/issues/4448
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_stream_capture_all_ok(MODEL).await
 // }
@@ -97,25 +97,25 @@ async fn test_tool_full_flow_ok() -> TestResult<()> {
 /// Once Ollama adds support, uncomment the tests below.
 
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_binary_image_url_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_url_ok(MODEL).await
 // }
 
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_binary_image_b64_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_b64_ok(MODEL).await
 // }
 
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_binary_pdf_b64_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_pdf_b64_ok(MODEL).await
 // }
 
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_binary_multi_b64_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_multi_binary_b64_ok(MODEL).await
 // }
