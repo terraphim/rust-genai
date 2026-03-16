@@ -1,5 +1,21 @@
 `.` minor | `-` Fix | `+` Addition | `^` improvement | `!` Change | `*` Refactor
 
+## 2026-03-16 - v0.6.0-beta.8-fork (Terraphim)
+
+- `!` Upstream sync to v0.6.0-beta.8 -- breaking Adapter trait changes (DEFAULT_API_KEY_ENV_NAME, all_model_names signature, AuthData::None)
+- `!` ChatMessage::tool renamed to ChatMessage::tool_response (upstream)
+- `+` New Adapter: Kimi (Moonshot AI) -- full chat and streaming support via `kimi::` namespace
+- `+` New Adapter: Bedrock (AWS) -- SigV4-signed requests for AWS Bedrock models
+- `+` New Adapter: Cerebras -- fast inference provider
+- `+` New Adapter: OpenRouter -- multi-provider routing via `openrouter::` namespace
+- `+` AuthData::BearerToken variant for providers requiring bearer token authentication
+- `+` ContentPart::ReasoningContent added (upstream)
+- `+` ChatResponse::stop_reason and InterStreamEnd::captured_stop_reason fields (upstream)
+- `+` ReasoningEffort::Max variant (upstream)
+- `^` SSE streaming -- adapter-specific SSE parsing for Kimi and Zai streaming responses
+- `-` Zai adapter -- fixed trailing slash in endpoint URL construction
+- `*` OpenRouter -- removed as dedicated upstream adapter, retained in fork with namespace dispatch
+
 ## 2026-01-31 - [v0.5.3](https://github.com/jeremychone/rust-genai/compare/v0.5.2...v0.5.3)
 
 - `^` error - add request payload / response body when to chat response fail
