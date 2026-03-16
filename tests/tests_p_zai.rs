@@ -82,6 +82,35 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_capture_all_ok(MODEL, None).await
 }
 
+// Verify Zai streaming uses OpenAI-style SSE (data: {"choices":[...]})
+// via delegation to OpenAIAdapter::to_chat_stream.
+// No custom streamer needed -- Zai is fully OpenAI-compatible.
+
+#[tokio::test]
+#[ignore]
+async fn test_chat_stream_namespaced_simple_ok() -> TestResult<()> {
+	// Verify streaming works with the explicit zai:: namespace prefix
+	common_tests::common_test_chat_stream_simple_ok(MODEL_NS, None).await
+}
+
+#[tokio::test]
+#[ignore]
+async fn test_chat_stream_namespaced_capture_content_ok() -> TestResult<()> {
+	common_tests::common_test_chat_stream_capture_content_ok(MODEL_NS).await
+}
+
+#[tokio::test]
+#[ignore]
+async fn test_chat_stream_namespaced_capture_all_ok() -> TestResult<()> {
+	common_tests::common_test_chat_stream_capture_all_ok(MODEL_NS, None).await
+}
+
+#[tokio::test]
+#[ignore]
+async fn test_chat_stream_tool_capture_ok() -> TestResult<()> {
+	common_tests::common_test_chat_stream_tool_capture_ok(MODEL).await
+}
+
 // endregion: --- Chat Stream Tests
 
 // region:    --- Binary Tests
