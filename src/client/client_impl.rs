@@ -22,7 +22,8 @@ impl Client {
 	/// - Adapters should filter non-chat models until more skills are supported.
 	///   Future: `model_names(adapter_kind, Option<&[Skill]>)`.
 	pub async fn all_model_names(&self, adapter_kind: AdapterKind) -> Result<Vec<String>> {
-		let models = AdapterDispatcher::all_model_names(adapter_kind).await?;
+		let (auth, endpoint) = self.config().resolve_adapter_config(adapter_kind).await?;
+		let models = AdapterDispatcher::all_model_names(adapter_kind, endpoint, auth).await?;
 		Ok(models)
 	}
 
@@ -79,7 +80,7 @@ impl Client {
 		} = AdapterDispatcher::to_web_request_data(target, ServiceType::Chat, chat_req, options_set.clone())?;
 
 		if let Some(extra_headers) = options.and_then(|o| o.extra_headers.as_ref()) {
-			headers.merge_with(&extra_headers);
+			headers.merge_with(extra_headers);
 		}
 
 		if let AuthData::RequestOverride {
@@ -150,7 +151,7 @@ impl Client {
 		} = AdapterDispatcher::to_web_request_data(target, ServiceType::ChatStream, chat_req, options_set.clone())?;
 
 		if let Some(extra_headers) = options.and_then(|o| o.extra_headers.as_ref()) {
-			headers.merge_with(&extra_headers);
+			headers.merge_with(extra_headers);
 		}
 
 		// TODO: Need to check this.

@@ -1,10 +1,11 @@
 use crate::adapter::adapters::support::get_api_key;
-use crate::adapter::openai::OpenAIStreamer;
+use crate::adapter::openai::OpenAIAdapter;
+use crate::adapter::openai_resp::OpenAIRespStreamer;
 use crate::adapter::openai_resp::resp_types::RespResponse;
 use crate::adapter::{Adapter, AdapterDispatcher, AdapterKind, ServiceType, WebRequestData};
 use crate::chat::{
 	ChatOptionsSet, ChatRequest, ChatResponse, ChatResponseFormat, ChatRole, ChatStream, ChatStreamResponse,
-	ContentPart, MessageContent, ReasoningEffort, Usage,
+	ContentPart, MessageContent, ReasoningEffort, StopReason, Tool, ToolConfig, ToolName, Usage,
 };
 use crate::resolver::{AuthData, Endpoint};
 use crate::webc::{EventSourceStream, WebResponse};
@@ -16,22 +17,18 @@ use value_ext::JsonValueExt;
 
 pub struct OpenAIRespAdapter;
 
-// Latest models
-const MODELS: &[&str] = &[
-	//
-	"gpt-5-pro",
-	"gpt-5-codex",
-	"gpt-5.1-codex",
-	"gpt-5.1-codex-mini",
-];
-
 impl OpenAIRespAdapter {
 	pub const API_KEY_DEFAULT_ENV_NAME: &str = "OPENAI_API_KEY";
 }
 
 impl Adapter for OpenAIRespAdapter {
+	const DEFAULT_API_KEY_ENV_NAME: Option<&'static str> = Some(Self::API_KEY_DEFAULT_ENV_NAME);
+
 	fn default_auth() -> AuthData {
-		AuthData::from_env(Self::API_KEY_DEFAULT_ENV_NAME)
+		match Self::DEFAULT_API_KEY_ENV_NAME {
+			Some(env_name) => AuthData::from_env(env_name),
+			None => AuthData::None,
+		}
 	}
 
 	fn default_endpoint() -> Endpoint {
@@ -40,8 +37,9 @@ impl Adapter for OpenAIRespAdapter {
 	}
 
 	/// Note: Currently returns the common models (see above)
-	async fn all_model_names(_kind: AdapterKind) -> Result<Vec<String>> {
-		Ok(MODELS.iter().map(|s| s.to_string()).collect())
+	async fn all_model_names(kind: AdapterKind, endpoint: Endpoint, auth: AuthData) -> Result<Vec<String>> {
+		//
+		OpenAIAdapter::list_model_names_for_end_target(kind, endpoint, auth).await
 	}
 
 	fn get_service_url(model: &ModelIden, service_type: ServiceType, endpoint: Endpoint) -> Result<String> {
@@ -75,14 +73,7 @@ impl Adapter for OpenAIRespAdapter {
 		// -- headers
 		let headers = Headers::from(("Authorization".to_string(), format!("Bearer {api_key}")));
 
-		// -- for new v1/responses/ for now do not support stream
 		let stream = matches!(service_type, ServiceType::ChatStream);
-		if stream {
-			return Err(Error::AdapterNotSupported {
-				adapter_kind,
-				feature: "stream".into(),
-			});
-		}
 
 		// -- compute reasoning_effort and eventual trimmed model_name
 		// For now, just for openai AdapterKind
@@ -109,7 +100,8 @@ impl Adapter for OpenAIRespAdapter {
 		let mut payload = json!({
 			"store": false,
 			"model": model_name,
-			"input": messages
+			"input": messages,
+			"stream": stream,
 		});
 
 		// -- Set reasoning effort
@@ -174,10 +166,6 @@ impl Adapter for OpenAIRespAdapter {
 		}
 
 		// -- Add supported ChatOptions
-		if stream & chat_options.capture_usage().unwrap_or(false) {
-			payload.x_insert("stream_options", json!({"include_usage": true}))?;
-		}
-
 		if let Some(temperature) = chat_options.temperature() {
 			payload.x_insert("temperature", temperature)?;
 		}
@@ -231,6 +219,7 @@ impl Adapter for OpenAIRespAdapter {
 			reasoning_content,
 			model_iden,
 			provider_model_iden,
+			stop_reason: Some(StopReason::from(resp.status)),
 			usage,
 			captured_raw_body,
 		})
@@ -242,7 +231,7 @@ impl Adapter for OpenAIRespAdapter {
 		options_sets: ChatOptionsSet<'_, '_>,
 	) -> Result<ChatStreamResponse> {
 		let event_source = EventSourceStream::new(reqwest_builder);
-		let openai_stream = OpenAIStreamer::new(event_source, model_iden.clone(), options_sets);
+		let openai_stream = OpenAIRespStreamer::new(event_source, model_iden.clone(), options_sets);
 		let chat_stream = ChatStream::from_inter_stream(openai_stream);
 
 		Ok(ChatStreamResponse {
@@ -392,6 +381,9 @@ impl OpenAIRespAdapter {
 								ContentPart::ToolCall(_) => (),
 								ContentPart::ToolResponse(_) => (),
 								ContentPart::ThoughtSignature(_) => (),
+								ContentPart::ReasoningContent(_) => (),
+								// Custom are ignored for this logic
+								ContentPart::Custom(_) => {}
 							}
 						}
 						input_items.push(json! ({"role": "user", "content": values}));
@@ -435,6 +427,9 @@ impl OpenAIRespAdapter {
 							ContentPart::Binary(_) => {}
 							ContentPart::ToolResponse(_) => {}
 							ContentPart::ThoughtSignature(_) => {}
+							ContentPart::ReasoningContent(_) => {}
+							// Custom are ignored for this logic
+							ContentPart::Custom(_) => {}
 						}
 					}
 
@@ -466,30 +461,60 @@ impl OpenAIRespAdapter {
 		}
 
 		// -- Process the tools
-		let tools = chat_req.tools.map(|tools| {
-			tools
-				.into_iter()
-				.map(|tool| {
-					// TODO: Need to handle the error correctly
-					// TODO: Needs to have a custom serializer (tool should not have to match to a provider)
-					// NOTE: Right now, low probability, so, we just return null if cannot convert to value.
-					json!({
-						"type": "function",
-						"name": tool.name,
-						"description": tool.description,
-						"parameters": tool.schema,
-						// TODO: If we need to support `strict: true` we need to add additionalProperties: false into the schema
-						//       above (like structured output)
-						"strict": false,
-					})
-				})
-				.collect::<Vec<Value>>()
-		});
+		let tools = chat_req
+			.tools
+			.map(|tools| tools.into_iter().map(Self::tool_to_openai_tool).collect::<Result<Vec<Value>>>())
+			.transpose()?;
 
 		Ok(OpenAIRespRequestParts { input_items, tools })
 	}
-}
 
+	fn tool_to_openai_tool(tool: Tool) -> Result<Value> {
+		let Tool {
+			name,
+			description,
+			schema,
+			config,
+		} = tool;
+
+		let name = match name {
+			ToolName::WebSearch => "web_search".to_string(),
+			ToolName::Custom(name) => name,
+		};
+
+		let tool_value = match name.as_ref() {
+			"web_search" => {
+				let mut tool_value = json!({"type": "web_search"});
+				match config {
+					Some(ToolConfig::WebSearch(_ws_config)) => {
+						// FIXME: Implement what is posible in filters
+					}
+					Some(ToolConfig::Custom(config_value)) => {
+						// IMPORTANT: Here like anthropic, we merge it on top of the toll value
+						//            (and not as value of "name" as this would not fit that api)
+						//            Gemini does a `{name: config}` which fit that API
+						tool_value.x_merge(config_value)?;
+					}
+					None => (),
+				};
+				tool_value
+			}
+			name => {
+				json!({
+					"type": "function",
+					"name": name,
+					"description": description,
+					"parameters": schema,
+					// TODO: If we need to support `strict: true` we need to add additionalProperties: false into the schema
+					//       above (like structured output)
+					"strict": false,
+				})
+			}
+		};
+
+		Ok(tool_value)
+	}
+}
 // region:    --- Support
 
 struct OpenAIRespRequestParts {

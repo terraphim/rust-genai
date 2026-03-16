@@ -1,6 +1,7 @@
 use crate::Headers;
 use crate::resolver::{Error, Result};
 use std::collections::HashMap;
+
 /// `AuthData` specifies either how or the key itself for an authentication resolver call.
 #[derive(Clone)]
 pub enum AuthData {
@@ -14,12 +15,17 @@ pub enum AuthData {
 	BearerToken(String),
 
 	/// Override headers and request url for unorthodox authentication schemes
-	RequestOverride { url: String, headers: Headers },
+	RequestOverride {
+		url: String,
+		headers: Headers,
+	},
 
 	/// The key names/values when a credential has multiple pieces of credential information.
 	/// This will be adapter-specific.
 	/// NOTE: Not used yet.
 	MultiKeys(HashMap<String, String>),
+
+	None,
 }
 
 /// Constructors
@@ -76,6 +82,7 @@ impl std::fmt::Debug for AuthData {
 			AuthData::RequestOverride { .. } => {
 				write!(f, "AuthData::RequestOverride {{ url: REDACTED, headers: REDACTED }}")
 			}
+			AuthData::None => write!(f, "None"),
 		}
 	}
 }

@@ -1,5 +1,9 @@
 //! Test to verify that our hardcoded model lists match the actual adapter code
 //! This test ensures consistency between our test expectations and the actual codebase
+//!
+//! NOTE: Since upstream v0.6.0-beta.8, DeepSeek, Groq, and ZAI no longer have static
+//! model lists -- they use dynamic API-based model discovery. Only fork adapters that
+//! still use static lists are checked here (Bedrock, Cerebras, Zhipu).
 
 use std::collections::HashMap;
 
@@ -52,25 +56,25 @@ fn read_adapter_models() -> HashMap<String, Vec<String>> {
 		Some(model_list)
 	}
 
-	// DeepSeek models
-	if let Ok(content) = std::fs::read_to_string(base_path.join("src/adapter/adapters/deepseek/adapter_impl.rs"))
-		&& let Some(model_list) = extract_model_array(&content, "pub(in crate::adapter) const MODELS: &[&str] = &[")
+	// Bedrock models
+	if let Ok(content) = std::fs::read_to_string(base_path.join("src/adapter/adapters/bedrock/adapter_impl.rs"))
+		&& let Some(model_list) = extract_model_array(&content, "pub const MODELS: &[&str] = &[")
 	{
-		models.insert("DeepSeek".to_string(), model_list);
+		models.insert("Bedrock".to_string(), model_list);
 	}
 
-	// Z.AI models
-	if let Ok(content) = std::fs::read_to_string(base_path.join("src/adapter/adapters/zai/adapter_impl.rs"))
+	// Cerebras models
+	if let Ok(content) = std::fs::read_to_string(base_path.join("src/adapter/adapters/cerebras/adapter_impl.rs"))
 		&& let Some(model_list) = extract_model_array(&content, "pub(in crate::adapter) const MODELS: &[&str] = &[")
 	{
-		models.insert("ZAi".to_string(), model_list);
+		models.insert("Cerebras".to_string(), model_list);
 	}
 
-	// Groq models
-	if let Ok(content) = std::fs::read_to_string(base_path.join("src/adapter/adapters/groq/adapter_impl.rs"))
+	// Zhipu models
+	if let Ok(content) = std::fs::read_to_string(base_path.join("src/adapter/adapters/zhipu/adapter_impl.rs"))
 		&& let Some(model_list) = extract_model_array(&content, "pub(in crate::adapter) const MODELS: &[&str] = &[")
 	{
-		models.insert("Groq".to_string(), model_list);
+		models.insert("Zhipu".to_string(), model_list);
 	}
 
 	models
@@ -80,29 +84,57 @@ fn read_adapter_models() -> HashMap<String, Vec<String>> {
 fn get_expected_models() -> std::collections::HashMap<String, Vec<String>> {
 	let mut expected = std::collections::HashMap::new();
 
-	// DeepSeek models
+	// Bedrock models
 	expected.insert(
-		"DeepSeek".to_string(),
+		"Bedrock".to_string(),
 		vec![
-			"deepseek-chat".to_string(),
-			"deepseek-reasoner".to_string(),
-			"deepseek-coder".to_string(),
+			"anthropic.claude-3-5-sonnet-20241022-v2:0".to_string(),
+			"anthropic.claude-3-5-haiku-20241022-v1:0".to_string(),
+			"anthropic.claude-3-opus-20240229-v1:0".to_string(),
+			"anthropic.claude-3-sonnet-20240229-v1:0".to_string(),
+			"anthropic.claude-3-haiku-20240307-v1:0".to_string(),
+			"meta.llama3-2-90b-instruct-v1:0".to_string(),
+			"meta.llama3-2-11b-instruct-v1:0".to_string(),
+			"meta.llama3-2-3b-instruct-v1:0".to_string(),
+			"meta.llama3-2-1b-instruct-v1:0".to_string(),
+			"meta.llama3-1-405b-instruct-v1:0".to_string(),
+			"meta.llama3-1-70b-instruct-v1:0".to_string(),
+			"meta.llama3-1-8b-instruct-v1:0".to_string(),
+			"meta.llama3-70b-instruct-v1:0".to_string(),
+			"meta.llama3-8b-instruct-v1:0".to_string(),
+			"amazon.titan-text-premier-v1:0".to_string(),
+			"amazon.titan-text-express-v1".to_string(),
+			"amazon.titan-text-lite-v1".to_string(),
+			"mistral.mistral-large-2407-v1:0".to_string(),
+			"mistral.mistral-large-2402-v1:0".to_string(),
+			"mistral.mistral-small-2402-v1:0".to_string(),
+			"mistral.mistral-7b-instruct-v0:2".to_string(),
+			"mistral.mixtral-8x7b-instruct-v0:1".to_string(),
+			"cohere.command-r-plus-v1:0".to_string(),
+			"cohere.command-r-v1:0".to_string(),
+			"ai21.jamba-1-5-large-v1:0".to_string(),
+			"ai21.jamba-1-5-mini-v1:0".to_string(),
 		],
 	);
 
-	// Z.AI models (from upstream v0.6.0-alpha.2)
+	// Cerebras models
 	expected.insert(
-		"ZAi".to_string(),
+		"Cerebras".to_string(),
+		vec![
+			"llama-3.3-70b".to_string(),
+			"llama-3.1-70b".to_string(),
+			"llama-3.1-8b".to_string(),
+			"llama-3.2-11b-vision".to_string(),
+			"llama-3.2-90b-vision".to_string(),
+			"llama-guard-3-8b".to_string(),
+		],
+	);
+
+	// Zhipu models
+	expected.insert(
+		"Zhipu".to_string(),
 		vec![
 			"glm-4-plus".to_string(),
-			"glm-4.6".to_string(),
-			"glm-4.5".to_string(),
-			"glm-4.5v".to_string(),
-			"glm-4.5-x".to_string(),
-			"glm-4.5-air".to_string(),
-			"glm-4.5-airx".to_string(),
-			"glm-4-32b-0414-128k".to_string(),
-			"glm-4.5-flash".to_string(),
 			"glm-4-air-250414".to_string(),
 			"glm-4-flashx-250414".to_string(),
 			"glm-4-flash-250414".to_string(),
@@ -118,32 +150,7 @@ fn get_expected_models() -> std::collections::HashMap<String, Vec<String>> {
 			"glm-z1-flashx".to_string(),
 			"glm-4.1v-thinking-flash".to_string(),
 			"glm-4.1v-thinking-flashx".to_string(),
-		],
-	);
-
-	// Groq models (all models from adapter code)
-	expected.insert(
-		"Groq".to_string(),
-		vec![
-			"moonshotai/kimi-k2-instruct".to_string(),
-			"qwen/qwen3-32b".to_string(),
-			"mistral-saba-24b".to_string(),
-			"meta-llama/llama-4-scout-17b-16e-instruct".to_string(),
-			"meta-llama/llama-4-maverick-17b-128e-instruct".to_string(),
-			"llama-3.3-70b-versatile".to_string(),
-			"llama-3.2-3b-preview".to_string(),
-			"llama-3.2-1b-preview".to_string(),
-			"llama-3.1-405b-reasoning".to_string(),
-			"llama-3.1-70b-versatile".to_string(),
-			"llama-3.1-8b-instant".to_string(),
-			"mixtral-8x7b-32768".to_string(),
-			"gemma2-9b-it".to_string(),
-			"gemma-7b-it".to_string(),
-			"llama-guard-3-8b".to_string(),
-			"llama3-70b-8192".to_string(),
-			"deepseek-r1-distill-llama-70b".to_string(),
-			"llama-3.2-11b-vision-preview".to_string(),
-			"llama-3.2-90b-vision-preview".to_string(),
+			"glm-4.5".to_string(),
 		],
 	);
 
@@ -153,7 +160,7 @@ fn get_expected_models() -> std::collections::HashMap<String, Vec<String>> {
 /// Test that our test expectations match the actual adapter code
 #[test]
 fn test_adapter_code_consistency() -> Result<(), Box<dyn std::error::Error>> {
-	println!("🔍 Verifying test expectations match actual adapter code...\n");
+	println!("Verifying test expectations match actual adapter code...\n");
 
 	let actual_models = read_adapter_models();
 	let test_models = get_expected_models();
@@ -170,26 +177,26 @@ fn test_adapter_code_consistency() -> Result<(), Box<dyn std::error::Error>> {
 				let actual_set: std::collections::HashSet<_> = actual_list.iter().collect();
 
 				if expected_set == actual_set {
-					println!("  ✅ Test and code models match");
-					println!("  📊 {} models", actual_set.len());
+					println!("  Test and code models match");
+					println!("  {} models", actual_set.len());
 				} else {
-					println!("  ❌ Mismatch found!");
+					println!("  Mismatch found!");
 
 					// Show differences
 					let missing: Vec<_> = expected_set.difference(&actual_set).collect();
 					let extra: Vec<_> = actual_set.difference(&expected_set).collect();
 
 					if !missing.is_empty() {
-						println!("  ⚠️  In test but not in code: {:?}", missing);
+						println!("  In test but not in code: {:?}", missing);
 					}
 					if !extra.is_empty() {
-						println!("  ⚠️  In code but not in test: {:?}", extra);
+						println!("  In code but not in test: {:?}", extra);
 					}
 					all_consistent = false;
 				}
 			}
 			None => {
-				println!("  ❌ Provider {} not found in adapter code", provider);
+				println!("  Provider {} not found in adapter code", provider);
 				all_consistent = false;
 			}
 		}
@@ -198,9 +205,9 @@ fn test_adapter_code_consistency() -> Result<(), Box<dyn std::error::Error>> {
 	}
 
 	if all_consistent {
-		println!("✅ All model lists are consistent!");
+		println!("All model lists are consistent!");
 	} else {
-		println!("❌ Some inconsistencies found");
+		println!("Some inconsistencies found");
 		panic!("Model lists in tests don't match adapter code");
 	}
 

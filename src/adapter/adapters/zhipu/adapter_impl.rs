@@ -35,6 +35,8 @@ impl ZhipuAdapter {
 
 // The Zhipu API is mostly compatible with the OpenAI API.
 impl Adapter for ZhipuAdapter {
+	const DEFAULT_API_KEY_ENV_NAME: Option<&'static str> = Some(Self::API_KEY_DEFAULT_ENV_NAME);
+
 	fn default_endpoint() -> Endpoint {
 		const BASE_URL: &str = "https://open.bigmodel.cn/api/paas/v4/";
 		Endpoint::from_static(BASE_URL)
@@ -44,7 +46,7 @@ impl Adapter for ZhipuAdapter {
 		AuthData::from_env(Self::API_KEY_DEFAULT_ENV_NAME)
 	}
 
-	async fn all_model_names(_kind: AdapterKind) -> Result<Vec<String>> {
+	async fn all_model_names(_kind: AdapterKind, _endpoint: Endpoint, _auth: AuthData) -> Result<Vec<String>> {
 		Ok(MODELS.iter().map(|s| s.to_string()).collect())
 	}
 
