@@ -1,7 +1,7 @@
 # rust-genai Agent Instructions
 
 ## Your Task
-You are implementing issue #5 for the rust-genai Rust library.
+You are implementing issue #10 for the rust-genai Rust library.
 Focus ALL your effort on writing production-quality Rust code and tests.
 Do NOT run gitea-robot, tea, or any task-tracking commands.
 The orchestrator handles all task tracking.
