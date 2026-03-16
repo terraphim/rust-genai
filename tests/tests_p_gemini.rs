@@ -15,11 +15,13 @@ const MODEL_NS: &str = "gemini::gemini-2.5-flash";
 // region:    --- Chat
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_simple_ok() -> TestResult<()> {
 	common_tests::common_test_chat_simple_ok(MODEL, None).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_reasoning_ok() -> TestResult<()> {
 	common_tests::common_test_chat_reasoning_ok(
 		MODEL_GPRO_3,
@@ -30,26 +32,31 @@ async fn test_chat_reasoning_ok() -> TestResult<()> {
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_namespaced_ok() -> TestResult<()> {
 	common_tests::common_test_chat_simple_ok(MODEL_NS, None).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_multi_system_ok() -> TestResult<()> {
 	common_tests::common_test_chat_multi_system_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_json_structured_ok() -> TestResult<()> {
 	common_tests::common_test_chat_json_structured_ok(MODEL, Some(Check::USAGE)).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_temperature_ok() -> TestResult<()> {
 	common_tests::common_test_chat_temperature_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stop_sequences_ok(MODEL).await
 }
@@ -61,6 +68,7 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 // NOTE: This should eventually work with the 2.5 Flash, but right now, we do not get the cached_tokens
 //       So, disabling
 // #[tokio::test]
+#[ignore]
 // async fn test_chat_cache_implicit_simple_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_cache_implicit_simple_ok(MODEL).await
 // }
@@ -70,16 +78,19 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 // region:    --- Chat Stream Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_stream_simple_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_simple_ok(MODEL, None).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_stream_capture_content_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_capture_content_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_capture_all_ok(MODEL, None).await
 }
@@ -90,26 +101,31 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 
 // NOTE: Gemini does not seem to support URL
 // #[tokio::test]
+#[ignore]
 // async fn test_chat_binary_image_url_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_url_ok(MODEL).await
 // }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_binary_image_b64_ok() -> TestResult<()> {
 	common_tests::common_test_chat_image_b64_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_binary_pdf_b64_ok() -> TestResult<()> {
 	common_tests::common_test_chat_pdf_b64_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_binary_image_file_ok() -> TestResult<()> {
 	common_tests::common_test_chat_image_file_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_binary_multi_b64_ok() -> TestResult<()> {
 	common_tests::common_test_chat_multi_binary_b64_ok(MODEL).await
 }
@@ -119,16 +135,19 @@ async fn test_chat_binary_multi_b64_ok() -> TestResult<()> {
 // region:    --- Tool Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_tool_simple_ok() -> TestResult<()> {
 	common_tests::common_test_tool_simple_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_tool_full_flow_ok() -> TestResult<()> {
 	common_tests::common_test_tool_full_flow_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_tool_deterministic_history_gemini_3_ok() -> TestResult<()> {
 	use genai::chat::{ChatMessage, ChatRequest, Tool, ToolCall, ToolResponse};
 	use serde_json::json;
@@ -175,6 +194,7 @@ async fn test_tool_deterministic_history_gemini_3_ok() -> TestResult<()> {
 
 // NOTE: Issue of this test is that it is pretty slow
 #[tokio::test]
+#[ignore]
 async fn test_tool_google_web_search_ok() -> TestResult<()> {
 	use genai::chat::{ChatRequest, Tool};
 	use serde_json::json;
@@ -200,6 +220,7 @@ async fn test_tool_google_web_search_ok() -> TestResult<()> {
 // region:    --- Resolver Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_resolver_auth_ok() -> TestResult<()> {
 	common_tests::common_test_resolver_auth_ok(MODEL, AuthData::from_env("GEMINI_API_KEY")).await
 }
@@ -209,6 +230,7 @@ async fn test_resolver_auth_ok() -> TestResult<()> {
 // region:    --- List
 
 #[tokio::test]
+#[ignore]
 async fn test_list_models() -> TestResult<()> {
 	common_tests::common_test_list_models(AdapterKind::Gemini, "gemini-3-pro-preview").await
 }

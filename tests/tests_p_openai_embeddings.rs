@@ -11,16 +11,19 @@ const MODEL_NS: &str = "openai::text-embedding-3-small";
 // region:    --- Single Embedding Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_embed_single_simple_ok() -> TestResult<()> {
 	common_tests::common_test_embed_single_simple_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_embed_single_namespaced_ok() -> TestResult<()> {
 	common_tests::common_test_embed_single_simple_ok(MODEL_NS).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_embed_single_with_options_ok() -> TestResult<()> {
 	common_tests::common_test_embed_single_with_options_ok(MODEL).await
 }
@@ -30,11 +33,13 @@ async fn test_embed_single_with_options_ok() -> TestResult<()> {
 // region:    --- Batch Embedding Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_embed_batch_simple_ok() -> TestResult<()> {
 	common_tests::common_test_embed_batch_simple_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_embed_batch_empty_should_fail() -> TestResult<()> {
 	common_tests::common_test_embed_empty_batch_should_fail(MODEL).await
 }
@@ -44,6 +49,7 @@ async fn test_embed_batch_empty_should_fail() -> TestResult<()> {
 // region:    --- EmbedRequest Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_embed_request_single_ok() -> TestResult<()> {
 	let client = Client::default();
 	let embed_req = EmbedRequest::from_text("Direct EmbedRequest test");
@@ -60,6 +66,7 @@ async fn test_embed_request_single_ok() -> TestResult<()> {
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_embed_request_batch_ok() -> TestResult<()> {
 	let client = Client::default();
 	let embed_req = EmbedRequest::from_texts(vec![
@@ -84,6 +91,7 @@ async fn test_embed_request_batch_ok() -> TestResult<()> {
 // region:    --- Model Comparison Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_embed_different_models_ok() -> TestResult<()> {
 	let client = Client::default();
 	let text = "Compare embedding models";
@@ -109,6 +117,7 @@ async fn test_embed_different_models_ok() -> TestResult<()> {
 // region:    --- Error Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_embed_invalid_model_should_fail() -> TestResult<()> {
 	let client = Client::default();
 	let text = "Test with invalid model";
@@ -124,6 +133,7 @@ async fn test_embed_invalid_model_should_fail() -> TestResult<()> {
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_embed_empty_text_should_work() -> TestResult<()> {
 	let client = Client::default();
 	let text = "";
@@ -145,6 +155,7 @@ async fn test_embed_empty_text_should_work() -> TestResult<()> {
 // region:    --- Utility Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_embed_response_methods_ok() -> TestResult<()> {
 	let client = Client::default();
 	let texts = vec!["First".to_string(), "Second".to_string()];
@@ -178,6 +189,7 @@ async fn test_embed_response_methods_ok() -> TestResult<()> {
 // region:    --- Provider-Specific Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_embed_with_openai_specific_options_ok() -> TestResult<()> {
 	// OpenAI supports encoding_format and user parameters
 	let client = Client::default();

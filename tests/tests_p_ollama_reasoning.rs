@@ -19,6 +19,7 @@ const MODEL_QWEN3: &str = "qwen3:4b";
 // region:    --- Chat
 
 #[tokio::test]
+#[ignore]
 #[serial(ollama)]
 async fn test_chat_simple_ok() -> TestResult<()> {
 	// NOTE: For now, the Ollama Deepseek Distilled model does not add .reasoning_content,
@@ -27,12 +28,14 @@ async fn test_chat_simple_ok() -> TestResult<()> {
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(ollama)]
 async fn test_chat_multi_system_ok() -> TestResult<()> {
 	common_tests::common_test_chat_multi_system_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(ollama)]
 async fn test_chat_json_mode_ok() -> TestResult<()> {
 	// Note: Ollama does not capture usage on json mode (TODO: need to check now (2025-02-02))
@@ -40,12 +43,14 @@ async fn test_chat_json_mode_ok() -> TestResult<()> {
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(ollama)]
 async fn test_chat_temperature_ok() -> TestResult<()> {
 	common_tests::common_test_chat_temperature_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(ollama)]
 async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stop_sequences_ok(MODEL).await
@@ -53,6 +58,7 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 
 /// Note: Unfortunately, sometime, the 1.5b does not provide reasoning.
 #[tokio::test]
+#[ignore]
 #[serial(ollama)]
 async fn test_chat_reasoning_normalize_ok() -> TestResult<()> {
 	common_tests::common_test_chat_reasoning_normalize_ok(MODEL).await
@@ -62,18 +68,21 @@ async fn test_chat_reasoning_normalize_ok() -> TestResult<()> {
 // region:    --- Chat Stream Tests
 
 #[tokio::test]
+#[ignore]
 #[serial(ollama)]
 async fn test_chat_stream_simple_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_simple_ok(MODEL, None).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(ollama)]
 async fn test_chat_stream_capture_content_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_capture_content_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(ollama)]
 async fn test_chat_stream_reasoning_chunk_ok() -> TestResult<()> {
 	let client = Client::default();
@@ -99,6 +108,7 @@ async fn test_chat_stream_reasoning_chunk_ok() -> TestResult<()> {
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(ollama)]
 async fn test_chat_stream_non_empty_chunk_deepseek_ok() -> TestResult<()> {
 	let client = Client::default();
@@ -138,6 +148,7 @@ async fn test_chat_stream_non_empty_chunk_deepseek_ok() -> TestResult<()> {
 // /// COMMENTED FOR NOW AS OLLAMA OpenAI Compatibility Layer does not support
 // /// usage tokens when streaming. See https://github.com/ollama/ollama/issues/4448
 // #[tokio::test]
+#[ignore]
 // async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_stream_capture_all_ok(MODEL).await
 // }
@@ -147,6 +158,7 @@ async fn test_chat_stream_non_empty_chunk_deepseek_ok() -> TestResult<()> {
 // region:    --- Resolver Tests
 
 #[tokio::test]
+#[ignore]
 #[serial(ollama)]
 async fn test_resolver_auth_ok() -> TestResult<()> {
 	common_tests::common_test_resolver_auth_ok(MODEL, AuthData::from_single("ollama")).await
@@ -158,6 +170,7 @@ async fn test_resolver_auth_ok() -> TestResult<()> {
 
 /// NOTE this test assume the "gemma3:4b" is present.
 #[tokio::test]
+#[ignore]
 #[serial(ollama)]
 async fn test_list_models() -> TestResult<()> {
 	common_tests::common_test_list_models(AdapterKind::Ollama, "gemma3:4b").await

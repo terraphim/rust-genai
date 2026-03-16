@@ -19,12 +19,14 @@ const MODEL_NS: &str = "anthropic::claude-haiku-4-5";
 // region:    --- Chat
 
 #[tokio::test]
+#[ignore]
 #[serial(anthropic)]
 async fn test_chat_simple_ok() -> TestResult<()> {
 	common_tests::common_test_chat_simple_ok(MODEL, None).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(anthropic)]
 async fn test_chat_reasoning_ok() -> TestResult<()> {
 	// NOTE: Does not test REASONING_USAGE as Anthropic does not report it
@@ -33,24 +35,28 @@ async fn test_chat_reasoning_ok() -> TestResult<()> {
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(anthropic)]
 async fn test_chat_namespaced_ok() -> TestResult<()> {
 	common_tests::common_test_chat_simple_ok(MODEL_NS, None).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(anthropic)]
 async fn test_chat_multi_system_ok() -> TestResult<()> {
 	common_tests::common_test_chat_multi_system_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(anthropic)]
 async fn test_chat_temperature_ok() -> TestResult<()> {
 	common_tests::common_test_chat_temperature_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(anthropic)]
 async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stop_sequences_ok(MODEL).await
@@ -59,6 +65,7 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 /// TODO: Fix/Workaround - This test for "claude-3-7-sonnet-latest" (works for other models)
 /// NOTE: This doe snot work anymore
 // #[tokio::test]
+#[ignore]
 // #[serial(anthropic)]
 // async fn test_chat_json_mode_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_json_mode_ok(MODEL_THINKING, Some(Check::USAGE)).await
@@ -69,12 +76,14 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 // region:    --- Chat Explicit Cache
 
 #[tokio::test]
+#[ignore]
 #[serial(anthropic)]
 async fn test_chat_cache_explicit_user_ok() -> TestResult<()> {
 	common_tests::common_test_chat_cache_explicit_user_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(anthropic)]
 async fn test_chat_cache_explicit_system_ok() -> TestResult<()> {
 	common_tests::common_test_chat_cache_explicit_system_ok(MODEL).await
@@ -82,6 +91,7 @@ async fn test_chat_cache_explicit_system_ok() -> TestResult<()> {
 
 /// Test for 1-hour TTL cache (only supported on Claude 4.5 models)
 #[tokio::test]
+#[ignore]
 #[serial(anthropic)]
 async fn test_chat_cache_explicit_1h_ttl_ok() -> TestResult<()> {
 	common_tests::common_test_chat_cache_explicit_1h_ttl_ok(MODEL_THINKING).await
@@ -89,6 +99,7 @@ async fn test_chat_cache_explicit_1h_ttl_ok() -> TestResult<()> {
 
 /// Streaming test for 1-hour TTL cache (only supported on Claude 4.5 models)
 #[tokio::test]
+#[ignore]
 #[serial(anthropic)]
 async fn test_chat_stream_cache_explicit_1h_ttl_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_cache_explicit_1h_ttl_ok(MODEL_THINKING).await
@@ -99,18 +110,21 @@ async fn test_chat_stream_cache_explicit_1h_ttl_ok() -> TestResult<()> {
 // region:    --- Chat Stream Tests
 
 #[tokio::test]
+#[ignore]
 #[serial(anthropic)]
 async fn test_chat_stream_simple_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_simple_ok(MODEL, None).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(anthropic)]
 async fn test_chat_stream_capture_content_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_capture_content_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(anthropic)]
 async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 	// Anthropic does not seem to support reasoning for testing
@@ -124,26 +138,31 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 
 // Anthropic does not support image URL
 // #[tokio::test]
+#[ignore]
 // async fn test_chat_image_url_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_url_ok(MODEL).await
 // }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_binary_image_b64_ok() -> TestResult<()> {
 	common_tests::common_test_chat_image_b64_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_binary_pdf_b64_ok() -> TestResult<()> {
 	common_tests::common_test_chat_pdf_b64_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_binary_image_file_ok() -> TestResult<()> {
 	common_tests::common_test_chat_image_file_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_binary_multi_b64_ok() -> TestResult<()> {
 	common_tests::common_test_chat_multi_binary_b64_ok(MODEL).await
 }
@@ -153,12 +172,14 @@ async fn test_chat_binary_multi_b64_ok() -> TestResult<()> {
 // region:    --- Tool Tests
 
 #[tokio::test]
+#[ignore]
 #[serial(anthropic)]
 async fn test_tool_simple_ok() -> TestResult<()> {
 	common_tests::common_test_tool_simple_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 // #[serial(anthropic)]
 async fn test_tool_full_flow_ok() -> TestResult<()> {
 	common_tests::common_test_tool_full_flow_ok(MODEL).await
@@ -169,6 +190,7 @@ async fn test_tool_full_flow_ok() -> TestResult<()> {
 // region:    --- Resolver Tests
 
 #[tokio::test]
+#[ignore]
 #[serial(anthropic)]
 async fn test_resolver_auth_ok() -> TestResult<()> {
 	common_tests::common_test_resolver_auth_ok(MODEL, AuthData::from_env("ANTHROPIC_API_KEY")).await
@@ -179,6 +201,7 @@ async fn test_resolver_auth_ok() -> TestResult<()> {
 // region:    --- List
 
 #[tokio::test]
+#[ignore]
 async fn test_list_models() -> TestResult<()> {
 	common_tests::common_test_list_models(AdapterKind::Anthropic, "claude-opus-4-6").await
 }

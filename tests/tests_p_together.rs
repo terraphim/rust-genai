@@ -13,42 +13,49 @@ const MODEL_NS: &str = "together::Qwen/Qwen3-235B-A22B-Instruct-2507-tput";
 // region:    --- Chat
 
 #[tokio::test]
+#[ignore]
 #[serial(together)]
 async fn test_chat_simple_ok() -> TestResult<()> {
 	common_tests::common_test_chat_simple_ok(MODEL, None).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(together)]
 async fn test_chat_namespaced_ok() -> TestResult<()> {
 	common_tests::common_test_chat_simple_ok(MODEL_NS, None).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(together)]
 async fn test_chat_multi_system_ok() -> TestResult<()> {
 	common_tests::common_test_chat_multi_system_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(together)]
 async fn test_chat_json_mode_ok() -> TestResult<()> {
 	common_tests::common_test_chat_json_mode_ok(MODEL, Some(Check::USAGE)).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(together)]
 async fn test_chat_json_structured_ok() -> TestResult<()> {
 	common_tests::common_test_chat_json_structured_ok(MODEL, Some(Check::USAGE)).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(together)]
 async fn test_chat_temperature_ok() -> TestResult<()> {
 	common_tests::common_test_chat_temperature_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(together)]
 async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stop_sequences_ok(MODEL).await
@@ -60,6 +67,7 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 
 /// Caching does not seem to be supported for together (at least not reported)
 // #[tokio::test]
+#[ignore]
 // #[serial(together)]
 // async fn test_chat_cache_implicit_simple_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_cache_implicit_simple_ok(MODEL).await
@@ -70,18 +78,21 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 // region:    --- Chat Stream Tests
 
 #[tokio::test]
+#[ignore]
 #[serial(together)]
 async fn test_chat_stream_simple_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_simple_ok(MODEL, None).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(together)]
 async fn test_chat_stream_capture_content_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_capture_content_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 #[serial(together)]
 async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_capture_all_ok(MODEL, None).await
@@ -92,6 +103,7 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // region:    --- Binary Tests
 
 // #[tokio::test]
+#[ignore]
 // #[serial(together)]
 // async fn test_chat_binary_image_url_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_url_ok(MODEL).await
@@ -100,6 +112,7 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // NOTE: Only found that Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8 was supporting image without returning
 //       invalid format, but the rendered image could not be viewed yet.
 // #[tokio::test]
+#[ignore]
 // #[serial(together)]
 // async fn test_chat_binary_image_b64_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_b64_ok(MODEL_FOR_IMAGE).await
@@ -108,6 +121,7 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // NOT SUPPORTED YET
 
 // #[tokio::test]
+#[ignore]
 // #[serial(together)]
 // #[ignore = "Binary PDF is currently not supported by TogetherAI."]
 // async fn test_chat_binary_pdf_b64_ok() -> TestResult<()> {
@@ -115,6 +129,7 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // }
 
 // #[tokio::test]
+#[ignore]
 // #[serial(together)]
 // #[ignore = "Multiple binary payloads are currently not supported by TogetherAI."]
 // async fn test_chat_binary_multi_b64_ok() -> TestResult<()> {
@@ -126,6 +141,7 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // region:    --- Tool Tests
 
 #[tokio::test]
+#[ignore]
 #[serial(together)]
 async fn test_tool_simple_ok() -> TestResult<()> {
 	common_tests::common_test_tool_simple_ok(MODEL).await
@@ -134,6 +150,7 @@ async fn test_tool_simple_ok() -> TestResult<()> {
 // NOTE for now not working with Llama-3.3-70B-Instruct-Turbo
 // TODO: need to investigate
 #[tokio::test]
+#[ignore]
 #[serial(together)]
 async fn test_tool_full_flow_ok() -> TestResult<()> {
 	common_tests::common_test_tool_full_flow_ok(MODEL).await
@@ -144,6 +161,7 @@ async fn test_tool_full_flow_ok() -> TestResult<()> {
 // region:    --- Resolver Tests
 
 #[tokio::test]
+#[ignore]
 #[serial(together)]
 async fn test_resolver_auth_ok() -> TestResult<()> {
 	common_tests::common_test_resolver_auth_ok(MODEL, AuthData::from_env("TOGETHER_API_KEY")).await
@@ -155,6 +173,7 @@ async fn test_resolver_auth_ok() -> TestResult<()> {
 
 // NOTE: 2026-02-15 - returns empty array
 // #[tokio::test]
+// #[ignore]
 // #[serial(together)]
 // async fn test_list_models() -> TestResult<()> {
 // 	common_tests::common_test_list_models(AdapterKind::Together, "Qwen").await

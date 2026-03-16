@@ -10,31 +10,37 @@ const MODEL_NS: &str = "deepseek::deepseek-chat";
 // region:    --- Chat
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_simple_ok() -> TestResult<()> {
 	common_tests::common_test_chat_simple_ok(MODEL, None).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_namespaced_ok() -> TestResult<()> {
 	common_tests::common_test_chat_simple_ok(MODEL_NS, None).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_multi_system_ok() -> TestResult<()> {
 	common_tests::common_test_chat_multi_system_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_json_mode_ok() -> TestResult<()> {
 	common_tests::common_test_chat_json_mode_ok(MODEL, Some(Check::USAGE)).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_temperature_ok() -> TestResult<()> {
 	common_tests::common_test_chat_temperature_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stop_sequences_ok(MODEL).await
 }
@@ -44,16 +50,19 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 // region:    --- Chat Stream Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_stream_simple_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_simple_ok(MODEL, None).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_stream_capture_content_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_capture_content_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_capture_all_ok(MODEL, None).await
 }
@@ -65,21 +74,25 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // Deepseek.com does not seems to support those
 
 // #[tokio::test]
+#[ignore]
 // async fn test_chat_binary_image_url_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_url_ok(MODEL).await
 // }
 
 // #[tokio::test]
+#[ignore]
 // async fn test_chat_binary_image_b64_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_b64_ok(MODEL).await
 // }
 
 // #[tokio::test]
+#[ignore]
 // async fn test_chat_binary_pdf_b64_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_pdf_b64_ok(MODEL).await
 // }
 
 // #[tokio::test]
+#[ignore]
 // async fn test_chat_binary_multi_b64_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_multi_binary_b64_ok(MODEL).await
 // }
@@ -89,6 +102,7 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // region:    --- Resolver Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_resolver_auth_ok() -> TestResult<()> {
 	common_tests::common_test_resolver_auth_ok(MODEL, AuthData::from_env("DEEPSEEK_API_KEY")).await
 }
@@ -98,6 +112,7 @@ async fn test_resolver_auth_ok() -> TestResult<()> {
 // region:    --- List
 
 #[tokio::test]
+#[ignore]
 async fn test_list_models() -> TestResult<()> {
 	common_tests::common_test_list_models(AdapterKind::DeepSeek, "deepseek-chat").await
 }

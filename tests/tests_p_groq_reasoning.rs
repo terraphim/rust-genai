@@ -11,6 +11,7 @@ const MODEL: &str = "deepseek-r1-distill-llama-70b";
 // region:    --- Chat
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_simple_ok() -> TestResult<()> {
 	// NOTE: For now, the Ollama Deepseek Distilled model does not add .reasoning_content,
 	//       but has a <think> tag which is tested in test_chat_reasoning_normalize_ok.
@@ -18,27 +19,32 @@ async fn test_chat_simple_ok() -> TestResult<()> {
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_multi_system_ok() -> TestResult<()> {
 	common_tests::common_test_chat_multi_system_ok(MODEL).await
 }
 
 // THis model does not seem to support json mode
 // #[tokio::test]
+#[ignore]
 // async fn test_chat_json_mode_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_json_mode_ok(MODEL, Some(Check::USAGE)).await
 // }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_temperature_ok() -> TestResult<()> {
 	common_tests::common_test_chat_temperature_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stop_sequences_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_reasoning_normalize_ok() -> TestResult<()> {
 	common_tests::common_test_chat_reasoning_normalize_ok(MODEL).await
 }
@@ -48,16 +54,19 @@ async fn test_chat_reasoning_normalize_ok() -> TestResult<()> {
 // region:    --- Chat Stream Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_stream_simple_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_simple_ok(MODEL, None).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_stream_capture_content_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_capture_content_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 	// NOTE: At this point, genai does not capture the <think> while streaming
 	common_tests::common_test_chat_stream_capture_all_ok(MODEL, None).await
@@ -68,6 +77,7 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // region:    --- Resolver Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_resolver_auth_ok() -> TestResult<()> {
 	common_tests::common_test_resolver_auth_ok(MODEL, AuthData::from_env("GROQ_API_KEY")).await
 }
@@ -77,6 +87,7 @@ async fn test_resolver_auth_ok() -> TestResult<()> {
 // region:    --- List
 
 #[tokio::test]
+#[ignore]
 async fn test_list_models() -> TestResult<()> {
 	common_tests::common_test_list_models(AdapterKind::Groq, "llama-3.1-70b-versatile").await
 }

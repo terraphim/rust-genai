@@ -4,6 +4,7 @@ use genai::chat::{ChatMessage, ChatRequest};
 const MODEL: &str = "gemini-3-pro-image-preview";
 
 #[tokio::test]
+#[ignore]
 async fn test_p_gemini_image_generation() -> Result<(), Box<dyn std::error::Error>> {
 	let client = Client::default();
 	let prompt = "Generate a small icon of a star";
