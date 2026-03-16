@@ -67,7 +67,6 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 // endregion: --- Chat Implicit Cache
 
 // region:    --- Chat Stream Tests
-
 #[tokio::test]
 #[ignore]
 async fn test_chat_stream_simple_ok() -> TestResult<()> {
@@ -95,7 +94,6 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // async fn test_chat_binary_image_url_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_url_ok(MODEL_IMAGE).await
 // }
-
 #[tokio::test]
 #[ignore]
 async fn test_chat_binary_image_b64_ok() -> TestResult<()> {
@@ -119,7 +117,6 @@ async fn test_chat_binary_image_b64_ok() -> TestResult<()> {
 // endregion: --- Binary Tests
 
 // region:    --- Tool Tests
-
 #[tokio::test]
 #[ignore]
 async fn test_tool_simple_ok() -> TestResult<()> {

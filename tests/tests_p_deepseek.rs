@@ -100,7 +100,6 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // endregion: --- Binary Tests
 
 // region:    --- Resolver Tests
-
 #[tokio::test]
 #[ignore]
 async fn test_resolver_auth_ok() -> TestResult<()> {

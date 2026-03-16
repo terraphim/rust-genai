@@ -30,7 +30,6 @@ async fn test_chat_multi_system_ok() -> TestResult<()> {
 // async fn test_chat_json_mode_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_json_mode_ok(MODEL, Some(Check::USAGE)).await
 // }
-
 #[tokio::test]
 #[ignore]
 async fn test_chat_temperature_ok() -> TestResult<()> {

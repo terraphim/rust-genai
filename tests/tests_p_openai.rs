@@ -33,7 +33,6 @@ async fn test_chat_reasoning_minimal_ok() -> TestResult<()> {
 // endregion: --- Provider Specific
 
 // region:    --- Chat
-
 #[tokio::test]
 #[ignore]
 async fn test_chat_simple_ok() -> TestResult<()> {

@@ -76,7 +76,6 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 // endregion: --- Chat Implicit Cache
 
 // region:    --- Chat Stream Tests
-
 #[tokio::test]
 #[ignore]
 #[serial(together)]
@@ -139,7 +138,6 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // endregion: --- Binary Tests
 
 // region:    --- Tool Tests
-
 #[tokio::test]
 #[ignore]
 #[serial(together)]

@@ -15,25 +15,26 @@ pub struct Tool {
 	/// JSON Schema for the tool parameters.
 	/// Example:
 	/// ```rust
-	/// json!({
-	/// "type": "object",
-	/// "properties": {
-	///    "city": {
-	///        "type": "string",
-	///        "description": "The city name"
-	///    },
-	///    "country": {
-	///        "type": "string",
-	///        "description": "The most likely country of this city name"
-	///    },
-	///    "unit": {
-	///        "type": "string",
-	///        "enum": ["C", "F"],
-	///        "description": "The temperature unit for the country. C for Celsius, and F for Fahrenheit"
-	///    }
-	/// },
-	/// "required": ["city", "country", "unit"],
-	/// })
+	/// use serde_json::json;
+	/// let schema = json!({
+	///     "type": "object",
+	///     "properties": {
+	///         "city": {
+	///             "type": "string",
+	///             "description": "The city name"
+	///         },
+	///         "country": {
+	///             "type": "string",
+	///             "description": "The most likely country of this city name"
+	///         },
+	///         "unit": {
+	///             "type": "string",
+	///             "enum": ["C", "F"],
+	///             "description": "The temperature unit for the country. C for Celsius, and F for Fahrenheit"
+	///         }
+	///     },
+	///     "required": ["city", "country", "unit"],
+	/// });
 	/// ```
 	pub schema: Option<Value>,
 

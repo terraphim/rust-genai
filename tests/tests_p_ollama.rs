@@ -77,7 +77,6 @@ async fn test_chat_stream_capture_content_ok() -> TestResult<()> {
 // endregion: --- Chat Stream Tests
 
 // region:    --- Tool Tests
-
 #[tokio::test]
 #[ignore]
 async fn test_tool_simple_ok() -> TestResult<()> {
@@ -124,7 +123,6 @@ async fn test_tool_full_flow_ok() -> TestResult<()> {
 // endregion: --- Binary Tests
 
 // region:    --- Resolver Tests
-
 #[tokio::test]
 #[ignore]
 async fn test_resolver_auth_ok() -> TestResult<()> {

@@ -19,16 +19,16 @@
 //!
 //! ## For example
 //!
-//! ```rust
+//! ```rust,ignore
 //! use genai::resolver::{Endpoint, ServiceTargetResolver};
 //! use genai::{Client, AdapterKind, ModelIden};
 //!
 //! let client = Client::builder().with_service_target_resolver(target_resolver).build();
 //!
 //! // Use regular API
-//! let response = client.exec_chat("glm-4.6", chat_request, None).await?;
+//! let response = client.exec_chat("glm-4.6", chat_request.clone(), None).await?;
 //! // Same, regular API
-//! let response = client.exec_chat("zai::glm-4.6", chat_request, None).await?;
+//! let response = client.exec_chat("zai::glm-4.6", chat_request.clone(), None).await?;
 //!
 //! // Use coding plan
 //! let response = client.exec_chat("zai-coding::glm-4.6", chat_request, None).await?;

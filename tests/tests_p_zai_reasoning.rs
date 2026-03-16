@@ -14,7 +14,6 @@ const MODEL: &str = "glm-z1-flash";
 // async fn test_chat_simple_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_simple_ok(MODEL, Some(Check::REASONING)).await
 // }
-
 #[tokio::test]
 #[ignore]
 async fn test_chat_multi_system_ok() -> TestResult<()> {
@@ -39,7 +38,6 @@ async fn test_chat_temperature_ok() -> TestResult<()> {
 // async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_stop_sequences_ok(MODEL).await
 // }
-
 #[tokio::test]
 #[ignore]
 async fn test_chat_reasoning_normalize_ok() -> TestResult<()> {
@@ -55,7 +53,6 @@ async fn test_chat_reasoning_normalize_ok() -> TestResult<()> {
 // async fn test_chat_stream_simple_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_stream_simple_ok(MODEL, Some(Check::REASONING)).await
 // }
-
 #[tokio::test]
 #[ignore]
 async fn test_chat_stream_capture_content_ok() -> TestResult<()> {
@@ -72,7 +69,6 @@ async fn test_chat_stream_capture_content_ok() -> TestResult<()> {
 // endregion: --- Chat Stream Tests
 
 // region:    --- Resolver Tests
-
 #[tokio::test]
 #[ignore]
 async fn test_resolver_auth_ok() -> TestResult<()> {

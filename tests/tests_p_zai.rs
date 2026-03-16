@@ -40,7 +40,6 @@ async fn test_chat_json_mode_ok() -> TestResult<()> {
 // async fn test_chat_json_structured_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_json_structured_ok(MODEL, Some(Check::USAGE)).await
 // }
-
 #[tokio::test]
 #[ignore]
 async fn test_chat_temperature_ok() -> TestResult<()> {
@@ -65,7 +64,6 @@ async fn test_chat_temperature_ok() -> TestResult<()> {
 // endregion: --- Chat Implicit Cache
 
 // region:    --- Chat Stream Tests
-
 #[tokio::test]
 #[ignore]
 async fn test_chat_stream_simple_ok() -> TestResult<()> {

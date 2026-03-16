@@ -39,7 +39,6 @@ async fn test_chat_multi_system_ok() -> TestResult<()> {
 // async fn test_chat_json_structured_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_json_structured_ok(MODEL, true).await
 // }
-
 #[tokio::test]
 #[ignore]
 #[serial(xai)]
@@ -58,7 +57,6 @@ async fn test_chat_temperature_ok() -> TestResult<()> {
 // endregion: --- Chat
 
 // region:    --- Chat Stream Tests
-
 #[tokio::test]
 #[ignore]
 #[serial(xai)]
@@ -90,7 +88,6 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // async fn test_chat_binary_image_url_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_url_ok(MODEL).await
 // }
-
 #[tokio::test]
 #[ignore]
 #[serial(xai)]
@@ -115,7 +112,6 @@ async fn test_chat_binary_image_b64_ok() -> TestResult<()> {
 // endregion: --- Binary Tests
 
 // region:    --- Resolver Tests
-
 #[tokio::test]
 #[ignore]
 #[serial(xai)]

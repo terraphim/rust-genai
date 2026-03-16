@@ -156,7 +156,6 @@ async fn test_chat_stream_non_empty_chunk_deepseek_ok() -> TestResult<()> {
 // endregion: --- Chat Stream Tests
 
 // region:    --- Resolver Tests
-
 #[tokio::test]
 #[ignore]
 #[serial(ollama)]

@@ -49,7 +49,6 @@ async fn test_chat_json_structured_ok() -> TestResult<()> {
 // async fn test_chat_temperature_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_temperature_ok(MODEL).await
 // }
-
 #[tokio::test]
 #[ignore]
 async fn test_chat_stop_sequences_ok() -> TestResult<()> {
@@ -67,7 +66,6 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 // endregion: --- Chat
 
 // region:    --- Chat Stream Tests
-
 #[tokio::test]
 #[ignore]
 async fn test_chat_stream_simple_ok() -> TestResult<()> {
