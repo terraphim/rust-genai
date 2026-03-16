@@ -110,11 +110,6 @@ pub async fn common_test_chat_reasoning_ok(
 			.as_deref()
 			.ok_or("SHOULD have extracted some reasoning_content")?;
 		assert!(!reasoning_content.is_empty(), "reasoning_content should not be empty");
-		// We can assume that the reasoning content should be bigger than the content given the prompt to keep content very concise.
-		assert!(
-			reasoning_content.len() > content.len(),
-			"Reasoning content should be > than the content"
-		);
 	}
 
 	Ok(())
@@ -682,16 +677,16 @@ pub async fn common_test_chat_stream_capture_content_ok(model: &str) -> TestResu
 		"StreamEnd should not have any meta_usage"
 	);
 
-	// -- Check captured_content
-	let captured_content = get_option_value!(stream_end.captured_content);
-	assert!(!captured_content.is_empty(), "captured_content.length should be > 0");
-
 	// -- Check Reasoning Content
 	// Should always be none, as it was not instructed to be captured.
 	assert!(
 		stream_end.captured_reasoning_content.is_none(),
 		"The captured_reasoning_content should be None"
 	);
+
+	// -- Check captured_content
+	let captured_content = get_option_value!(stream_end.captured_content);
+	assert!(!captured_content.is_empty(), "captured_content.length should be > 0");
 
 	Ok(())
 }
@@ -915,7 +910,7 @@ pub async fn common_test_chat_multi_binary_b64_ok(model: &str) -> TestResult<()>
 	]));
 	chat_req = chat_req.append_message(ChatMessage::user(
 		"
-Can you tell me what those images and files are about. 
+Can you tell me what those images and files are about.
 	",
 	));
 

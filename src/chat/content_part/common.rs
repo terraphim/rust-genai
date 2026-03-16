@@ -1,7 +1,8 @@
-use crate::Result;
-use crate::chat::{Binary, ToolCall, ToolResponse};
+use crate::chat::{Binary, CustomPart, ToolCall, ToolResponse};
+use crate::{ModelIden, Result};
 use derive_more::From;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::path::Path;
 use std::sync::Arc;
 
@@ -24,6 +25,16 @@ pub enum ContentPart {
 
 	#[from(ignore)]
 	ThoughtSignature(String),
+
+	/// Reasoning/thinking content from models that support it (e.g., DeepSeek, kimi).
+	/// Adapters extract provider-specific reasoning and normalize it into this variant.
+	/// On the request path, adapters hoist these parts back into the provider wire format
+	/// (e.g., sibling `reasoning_content` field for OpenAI-compatible providers).
+	#[from(ignore)]
+	ReasoningContent(String),
+
+	#[from]
+	Custom(CustomPart),
 }
 
 /// Constructors
@@ -67,6 +78,10 @@ impl ContentPart {
 	/// Returns an error if the file cannot be read.
 	pub fn from_binary_file(file_path: impl AsRef<Path>) -> Result<ContentPart> {
 		Ok(ContentPart::Binary(Binary::from_file(file_path)?))
+	}
+
+	pub fn from_custom(data: Value, model_iden: Option<ModelIden>) -> Self {
+		ContentPart::Custom(CustomPart { data, model_iden })
 	}
 }
 
@@ -161,13 +176,31 @@ impl ContentPart {
 			None
 		}
 	}
+
+	/// Borrow the reasoning content if present.
+	pub fn as_reasoning_content(&self) -> Option<&str> {
+		if let ContentPart::ReasoningContent(reasoning) = self {
+			Some(reasoning)
+		} else {
+			None
+		}
+	}
+
+	/// Extract the reasoning content, consuming the part.
+	pub fn into_reasoning_content(self) -> Option<String> {
+		if let ContentPart::ReasoningContent(reasoning) = self {
+			Some(reasoning)
+		} else {
+			None
+		}
+	}
 }
 
 /// Computed accessors
 impl ContentPart {
 	/// Returns an approximate in-memory size of this `ContentPart`, in bytes.
 	///
-	/// - For `Text` and `ThoughtSignature`: the UTF-8 length of the string.
+	/// - For `Text`, `ThoughtSignature`, and `ReasoningContent`: the UTF-8 length of the string.
 	/// - For `Binary`: delegates to `Binary::size()`.
 	/// - For `ToolCall`: delegates to `ToolCall::size()`.
 	/// - For `ToolResponse`: delegates to `ToolResponse::size()`.
@@ -178,6 +211,8 @@ impl ContentPart {
 			ContentPart::ToolCall(tool_call) => tool_call.size(),
 			ContentPart::ToolResponse(tool_response) => tool_response.size(),
 			ContentPart::ThoughtSignature(thought) => thought.len(),
+			ContentPart::ReasoningContent(reasoning) => reasoning.len(),
+			ContentPart::Custom(_value) => 0, // TODO: will need to compute this size
 		}
 	}
 }
@@ -227,5 +262,10 @@ impl ContentPart {
 	/// Returns true if this part is a thought.
 	pub fn is_thought_signature(&self) -> bool {
 		matches!(self, ContentPart::ThoughtSignature(_))
+	}
+
+	/// Returns true if this part is reasoning content.
+	pub fn is_reasoning_content(&self) -> bool {
+		matches!(self, ContentPart::ReasoningContent(_))
 	}
 }

@@ -6,10 +6,17 @@ use genai::Client;
 async fn test_model_resolution_fixes() -> Result<(), Box<dyn std::error::Error>> {
 	let client = Client::default();
 
-	// Test deepseek-coder now resolves to DeepSeek
-	let target = client.resolve_service_target("deepseek-coder").await?;
+	// Test deepseek-chat resolves to DeepSeek
+	let target = client.resolve_service_target("deepseek-chat").await?;
 	assert_eq!(format!("{:?}", target.model.adapter_kind), "DeepSeek");
-	println!("✅ deepseek-coder -> DeepSeek");
+
+	// Test deepseek-reasoner resolves to DeepSeek
+	let target = client.resolve_service_target("deepseek-reasoner").await?;
+	assert_eq!(format!("{:?}", target.model.adapter_kind), "DeepSeek");
+
+	// Test namespaced deepseek-coder resolves to DeepSeek
+	let target = client.resolve_service_target("deepseek::deepseek-coder").await?;
+	assert_eq!(format!("{:?}", target.model.adapter_kind), "DeepSeek");
 
 	// Test cerebras::llama3.1-8b resolves to Cerebras
 	let target = client.resolve_service_target("cerebras::llama3.1-8b").await?;

@@ -24,6 +24,8 @@ impl OpenRouterAdapter {
 }
 
 impl Adapter for OpenRouterAdapter {
+	const DEFAULT_API_KEY_ENV_NAME: Option<&'static str> = Some(Self::API_KEY_DEFAULT_ENV_NAME);
+
 	fn default_auth() -> AuthData {
 		AuthData::from_env(Self::API_KEY_DEFAULT_ENV_NAME)
 	}
@@ -33,7 +35,7 @@ impl Adapter for OpenRouterAdapter {
 		Endpoint::from_static(BASE_URL)
 	}
 
-	async fn all_model_names(_kind: AdapterKind) -> Result<Vec<String>> {
+	async fn all_model_names(_kind: AdapterKind, _endpoint: Endpoint, _auth: AuthData) -> Result<Vec<String>> {
 		// For now, return empty - OpenRouter has many models and they should be specified directly
 		Ok(vec![])
 	}

@@ -8,14 +8,11 @@ use std::collections::HashMap;
 fn get_expected_models() -> HashMap<String, Vec<String>> {
 	let mut expected = HashMap::new();
 
-	// DeepSeek models (from src/adapter/adapters/deepseek/adapter_impl.rs)
+	// DeepSeek models - since v0.6.0, only deepseek-chat and deepseek-reasoner
+	// are auto-resolved; others require namespacing (deepseek::model-name)
 	expected.insert(
 		"DeepSeek".to_string(),
-		vec![
-			"deepseek-chat".to_string(),
-			"deepseek-reasoner".to_string(),
-			"deepseek-coder".to_string(),
-		],
+		vec!["deepseek-chat".to_string(), "deepseek-reasoner".to_string()],
 	);
 
 	// Z.AI models (from upstream v0.6.0-alpha.2 src/adapter/adapters/zai/adapter_impl.rs)
@@ -31,18 +28,16 @@ fn get_expected_models() -> HashMap<String, Vec<String>> {
 		],
 	);
 
-	// Note: Groq models are complex - some with meta-llama prefix may resolve to OpenRouter
-	// We'll test the ones that should definitely resolve to Groq
+	// Groq models - since v0.6.0, Groq models need namespacing (groq::model-name)
+	// Non-namespaced models fall through to Ollama or OpenRouter
 	expected.insert(
 		"Groq".to_string(),
 		vec![
-			"llama-3.1-8b-instant".to_string(),
-			"llama-3.1-70b-versatile".to_string(),
-			"mixtral-8x7b-32768".to_string(),
-			"gemma2-9b-it".to_string(),
-			"qwen/qwen3-32b".to_string(),
-			"moonshotai/kimi-k2-instruct".to_string(),
-			"mistral-saba-24b".to_string(),
+			"groq::llama-3.1-8b-instant".to_string(),
+			"groq::llama-3.1-70b-versatile".to_string(),
+			"groq::mixtral-8x7b-32768".to_string(),
+			"groq::gemma2-9b-it".to_string(),
+			"groq::mistral-saba-24b".to_string(),
 		],
 	);
 
@@ -118,10 +113,11 @@ async fn test_model_resolution_edge_cases() -> Result<(), Box<dyn std::error::Er
 		("glm-4.6", "Zai"),
 		("glm-4.5", "Zai"),
 		("glm-4-plus", "Zai"),
-		// DeepSeek models
-		("deepseek-coder", "DeepSeek"),
+		// DeepSeek models (only deepseek-chat and deepseek-reasoner auto-resolve)
 		("deepseek-reasoner", "DeepSeek"),
 		("deepseek-chat", "DeepSeek"),
+		// deepseek-coder requires namespacing
+		("deepseek::deepseek-coder", "DeepSeek"),
 		// Model namespace
 		("zai::glm-4.6", "Zai"),
 		("openai::gpt-4o", "OpenAI"),

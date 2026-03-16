@@ -1,5 +1,6 @@
 mod support;
 
+pub(super) mod aliyun;
 pub(super) mod anthropic;
 pub(super) mod bedrock;
 pub(super) mod bigmodel;

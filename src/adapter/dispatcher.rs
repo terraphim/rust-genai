@@ -2,6 +2,7 @@ use super::groq::GroqAdapter;
 use crate::adapter::adapters::mimo::MimoAdapter;
 use crate::adapter::adapters::together::TogetherAdapter;
 use crate::adapter::adapters::zai::ZaiAdapter;
+use crate::adapter::aliyun::AliyunAdapter;
 use crate::adapter::anthropic::AnthropicAdapter;
 use crate::adapter::bedrock::BedrockAdapter;
 use crate::adapter::bigmodel::BigModelAdapter;
@@ -49,6 +50,7 @@ impl AdapterDispatcher {
 			AdapterKind::DeepSeek => DeepSeekAdapter::default_endpoint(),
 			AdapterKind::Zai => ZaiAdapter::default_endpoint(),
 			AdapterKind::BigModel => BigModelAdapter::default_endpoint(),
+			AdapterKind::Aliyun => AliyunAdapter::default_endpoint(),
 			AdapterKind::Cohere => CohereAdapter::default_endpoint(),
 			AdapterKind::Ollama => OllamaAdapter::default_endpoint(),
 			AdapterKind::OpenRouter => OpenRouterAdapter::default_endpoint(),
@@ -73,6 +75,7 @@ impl AdapterDispatcher {
 			AdapterKind::DeepSeek => DeepSeekAdapter::default_auth(),
 			AdapterKind::Zai => ZaiAdapter::default_auth(),
 			AdapterKind::BigModel => BigModelAdapter::default_auth(),
+			AdapterKind::Aliyun => AliyunAdapter::default_auth(),
 			AdapterKind::Cohere => CohereAdapter::default_auth(),
 			AdapterKind::Ollama => OllamaAdapter::default_auth(),
 			AdapterKind::OpenRouter => OpenRouterAdapter::default_auth(),
@@ -82,27 +85,28 @@ impl AdapterDispatcher {
 		}
 	}
 
-	pub async fn all_model_names(kind: AdapterKind) -> Result<Vec<String>> {
+	pub async fn all_model_names(kind: AdapterKind, endpoint: Endpoint, auth: AuthData) -> Result<Vec<String>> {
 		match kind {
-			AdapterKind::OpenAI => OpenAIAdapter::all_model_names(kind).await,
-			AdapterKind::OpenAIResp => OpenAIRespAdapter::all_model_names(kind).await,
-			AdapterKind::Gemini => GeminiAdapter::all_model_names(kind).await,
-			AdapterKind::Anthropic => AnthropicAdapter::all_model_names(kind).await,
-			AdapterKind::Fireworks => FireworksAdapter::all_model_names(kind).await,
-			AdapterKind::Together => TogetherAdapter::all_model_names(kind).await,
-			AdapterKind::Groq => GroqAdapter::all_model_names(kind).await,
-			AdapterKind::Mimo => MimoAdapter::all_model_names(kind).await,
-			AdapterKind::Nebius => NebiusAdapter::all_model_names(kind).await,
-			AdapterKind::Xai => XaiAdapter::all_model_names(kind).await,
-			AdapterKind::DeepSeek => DeepSeekAdapter::all_model_names(kind).await,
-			AdapterKind::Zai => ZaiAdapter::all_model_names(kind).await,
-			AdapterKind::BigModel => BigModelAdapter::all_model_names(kind).await,
-			AdapterKind::Cohere => CohereAdapter::all_model_names(kind).await,
-			AdapterKind::Ollama => OllamaAdapter::all_model_names(kind).await,
-			AdapterKind::OpenRouter => OpenRouterAdapter::all_model_names(kind).await,
-			AdapterKind::Cerebras => CerebrasAdapter::all_model_names(kind).await,
-			AdapterKind::Bedrock => BedrockAdapter::all_model_names(kind).await,
-			AdapterKind::Zhipu => ZhipuAdapter::all_model_names(kind).await,
+			AdapterKind::OpenAI => OpenAIAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::OpenAIResp => OpenAIRespAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::Gemini => GeminiAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::Anthropic => AnthropicAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::Fireworks => FireworksAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::Together => TogetherAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::Groq => GroqAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::Mimo => MimoAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::Nebius => NebiusAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::Xai => XaiAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::DeepSeek => DeepSeekAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::Zai => ZaiAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::BigModel => BigModelAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::Aliyun => AliyunAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::Cohere => CohereAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::Ollama => OllamaAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::OpenRouter => OpenRouterAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::Cerebras => CerebrasAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::Bedrock => BedrockAdapter::all_model_names(kind, endpoint, auth).await,
+			AdapterKind::Zhipu => ZhipuAdapter::all_model_names(kind, endpoint, auth).await,
 		}
 	}
 
@@ -121,6 +125,7 @@ impl AdapterDispatcher {
 			AdapterKind::DeepSeek => DeepSeekAdapter::get_service_url(model, service_type, endpoint),
 			AdapterKind::Zai => ZaiAdapter::get_service_url(model, service_type, endpoint),
 			AdapterKind::BigModel => BigModelAdapter::get_service_url(model, service_type, endpoint),
+			AdapterKind::Aliyun => AliyunAdapter::get_service_url(model, service_type, endpoint),
 			AdapterKind::Cohere => CohereAdapter::get_service_url(model, service_type, endpoint),
 			AdapterKind::Ollama => OllamaAdapter::get_service_url(model, service_type, endpoint),
 			AdapterKind::OpenRouter => OpenRouterAdapter::get_service_url(model, service_type, endpoint),
@@ -157,6 +162,7 @@ impl AdapterDispatcher {
 			AdapterKind::DeepSeek => DeepSeekAdapter::to_web_request_data(target, service_type, chat_req, options_set),
 			AdapterKind::Zai => ZaiAdapter::to_web_request_data(target, service_type, chat_req, options_set),
 			AdapterKind::BigModel => BigModelAdapter::to_web_request_data(target, service_type, chat_req, options_set),
+			AdapterKind::Aliyun => AliyunAdapter::to_web_request_data(target, service_type, chat_req, options_set),
 			AdapterKind::Cohere => CohereAdapter::to_web_request_data(target, service_type, chat_req, options_set),
 			AdapterKind::Ollama => OllamaAdapter::to_web_request_data(target, service_type, chat_req, options_set),
 			AdapterKind::OpenRouter => {
@@ -187,6 +193,7 @@ impl AdapterDispatcher {
 			AdapterKind::DeepSeek => DeepSeekAdapter::to_chat_response(model_iden, web_response, options_set),
 			AdapterKind::Zai => ZaiAdapter::to_chat_response(model_iden, web_response, options_set),
 			AdapterKind::BigModel => BigModelAdapter::to_chat_response(model_iden, web_response, options_set),
+			AdapterKind::Aliyun => AliyunAdapter::to_chat_response(model_iden, web_response, options_set),
 			AdapterKind::Cohere => CohereAdapter::to_chat_response(model_iden, web_response, options_set),
 			AdapterKind::Ollama => OllamaAdapter::to_chat_response(model_iden, web_response, options_set),
 			AdapterKind::OpenRouter => OpenRouterAdapter::to_chat_response(model_iden, web_response, options_set),
@@ -203,10 +210,7 @@ impl AdapterDispatcher {
 	) -> Result<ChatStreamResponse> {
 		match model_iden.adapter_kind {
 			AdapterKind::OpenAI => OpenAIAdapter::to_chat_stream(model_iden, reqwest_builder, options_set),
-			AdapterKind::OpenAIResp => Err(Error::AdapterNotSupported {
-				adapter_kind: model_iden.adapter_kind,
-				feature: "stream".to_string(),
-			}),
+			AdapterKind::OpenAIResp => OpenAIRespAdapter::to_chat_stream(model_iden, reqwest_builder, options_set),
 			AdapterKind::Gemini => GeminiAdapter::to_chat_stream(model_iden, reqwest_builder, options_set),
 			AdapterKind::Anthropic => AnthropicAdapter::to_chat_stream(model_iden, reqwest_builder, options_set),
 			AdapterKind::Fireworks => FireworksAdapter::to_chat_stream(model_iden, reqwest_builder, options_set),
@@ -218,6 +222,7 @@ impl AdapterDispatcher {
 			AdapterKind::DeepSeek => DeepSeekAdapter::to_chat_stream(model_iden, reqwest_builder, options_set),
 			AdapterKind::Zai => ZaiAdapter::to_chat_stream(model_iden, reqwest_builder, options_set),
 			AdapterKind::BigModel => BigModelAdapter::to_chat_stream(model_iden, reqwest_builder, options_set),
+			AdapterKind::Aliyun => AliyunAdapter::to_chat_stream(model_iden, reqwest_builder, options_set),
 			AdapterKind::Cohere => CohereAdapter::to_chat_stream(model_iden, reqwest_builder, options_set),
 			AdapterKind::Ollama => OllamaAdapter::to_chat_stream(model_iden, reqwest_builder, options_set),
 			AdapterKind::OpenRouter => OpenRouterAdapter::to_chat_stream(model_iden, reqwest_builder, options_set),
@@ -250,6 +255,7 @@ impl AdapterDispatcher {
 			AdapterKind::DeepSeek => DeepSeekAdapter::to_embed_request_data(target, embed_req, options_set),
 			AdapterKind::Zai => ZaiAdapter::to_embed_request_data(target, embed_req, options_set),
 			AdapterKind::BigModel => BigModelAdapter::to_embed_request_data(target, embed_req, options_set),
+			AdapterKind::Aliyun => AliyunAdapter::to_embed_request_data(target, embed_req, options_set),
 			AdapterKind::Cohere => CohereAdapter::to_embed_request_data(target, embed_req, options_set),
 			AdapterKind::Ollama => OllamaAdapter::to_embed_request_data(target, embed_req, options_set),
 			AdapterKind::OpenRouter => OpenRouterAdapter::to_embed_request_data(target, embed_req, options_set),
@@ -281,6 +287,7 @@ impl AdapterDispatcher {
 			AdapterKind::DeepSeek => DeepSeekAdapter::to_embed_response(model_iden, web_response, options_set),
 			AdapterKind::Zai => ZaiAdapter::to_embed_response(model_iden, web_response, options_set),
 			AdapterKind::BigModel => BigModelAdapter::to_embed_response(model_iden, web_response, options_set),
+			AdapterKind::Aliyun => AliyunAdapter::to_embed_response(model_iden, web_response, options_set),
 			AdapterKind::Cohere => CohereAdapter::to_embed_response(model_iden, web_response, options_set),
 			AdapterKind::Ollama => OllamaAdapter::to_embed_response(model_iden, web_response, options_set),
 			AdapterKind::OpenRouter => OpenRouterAdapter::to_embed_response(model_iden, web_response, options_set),

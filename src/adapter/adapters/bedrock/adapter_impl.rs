@@ -264,6 +264,8 @@ impl BedrockAdapter {
 }
 
 impl Adapter for BedrockAdapter {
+	const DEFAULT_API_KEY_ENV_NAME: Option<&'static str> = Some(Self::API_KEY_ENV);
+
 	fn default_endpoint() -> Endpoint {
 		let region = Self::get_region();
 		Endpoint::from_owned(Self::build_endpoint(&region))
@@ -274,7 +276,7 @@ impl Adapter for BedrockAdapter {
 		AuthData::from_env(Self::API_KEY_ENV)
 	}
 
-	async fn all_model_names(_kind: AdapterKind) -> Result<Vec<String>> {
+	async fn all_model_names(_kind: AdapterKind, _endpoint: Endpoint, _auth: AuthData) -> Result<Vec<String>> {
 		Ok(MODELS.iter().map(|s| s.to_string()).collect())
 	}
 
@@ -427,6 +429,7 @@ impl Adapter for BedrockAdapter {
 			reasoning_content,
 			model_iden,
 			provider_model_iden,
+			stop_reason: None,
 			usage,
 			captured_raw_body,
 		})

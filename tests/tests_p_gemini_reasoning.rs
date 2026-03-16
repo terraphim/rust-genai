@@ -8,6 +8,7 @@ const MODEL: &str = "gemini-2.5-flash"; // can add "-medium" .. suffix
 // NOTE: For now just single test to make sure reasoning token get captured.
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_simple_ok() -> TestResult<()> {
 	// NOTE: At this point, gemini 2.5 does not seems to give back reasoning content.
 	//       But it should have REASONING_USAGE

@@ -3,7 +3,8 @@ use crate::adapter::anthropic::AnthropicStreamer;
 use crate::adapter::{Adapter, AdapterKind, ServiceType, WebRequestData};
 use crate::chat::{
 	Binary, BinarySource, CacheControl, CacheCreationDetails, ChatOptionsSet, ChatRequest, ChatResponse, ChatRole,
-	ChatStream, ChatStreamResponse, ContentPart, MessageContent, PromptTokensDetails, ReasoningEffort, ToolCall, Usage,
+	ChatStream, ChatStreamResponse, ContentPart, MessageContent, PromptTokensDetails, ReasoningEffort, StopReason,
+	Tool, ToolCall, ToolConfig, ToolName, Usage,
 };
 use crate::resolver::{AuthData, Endpoint};
 use crate::webc::{EventSourceStream, WebResponse};
@@ -20,24 +21,88 @@ const REASONING_LOW: u32 = 1024;
 const REASONING_MEDIUM: u32 = 8000;
 const REASONING_HIGH: u32 = 24000;
 
-fn insert_anthropic_thinking_budget_value(payload: &mut Value, effort: &ReasoningEffort) -> Result<()> {
-	let thinking_budget = match effort {
-		ReasoningEffort::None => None,
-		ReasoningEffort::Budget(budget) => Some(*budget),
-		ReasoningEffort::Low | ReasoningEffort::Minimal => Some(REASONING_LOW),
-		ReasoningEffort::Medium => Some(REASONING_MEDIUM),
-		ReasoningEffort::High => Some(REASONING_HIGH),
-	};
+// NOTE: For now, those are opt-ins, but should become opt-out when well supported.
+// see: effort doc: https://platform.claude.com/docs/en/build-with-claude/effort
+const SUPPORT_EFFORT_MODELS: &[&str] = &["claude-opus-4-6", "claude-sonnet-4-6", "claude-opus-4-5"];
+const SUPPORT_REASONING_MAX_MODELS: &[&str] = &["claude-opus-4-6"];
+// see:adaptive thinking: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking
+const SUPPORT_ADAPTTIVE_THINK_MODELS: &[&str] = &["claude-opus-4-6", "claude-sonnet-4-6"];
 
-	if let Some(thinking_budget) = thinking_budget {
-		payload.x_insert(
-			"thinking",
-			json!({
-				"type": "enabled",
-				"budget_tokens": thinking_budget
-			}),
-		)?;
+fn has_model(model_prefixes: &[&str], model_name: &str) -> bool {
+	model_prefixes.iter().any(|prefix| model_name.contains(prefix))
+}
+
+fn insert_anthropic_reasoning(payload: &mut Value, model_name: &str, effort: &ReasoningEffort) -> Result<()> {
+	let mut budget: Option<u32> = None;
+	let support_effort = has_model(SUPPORT_EFFORT_MODELS, model_name);
+	let support_reasoning_max = has_model(SUPPORT_REASONING_MAX_MODELS, model_name);
+	let support_adaptive = has_model(SUPPORT_ADAPTTIVE_THINK_MODELS, model_name);
+
+	// if support effort, we default with effor
+	if support_effort {
+		let effort = match effort {
+			ReasoningEffort::Minimal => "low",
+			ReasoningEffort::Low => "low",
+			ReasoningEffort::Medium => "medium",
+			ReasoningEffort::High => "high",
+			ReasoningEffort::Max if support_reasoning_max => "max",
+			ReasoningEffort::Max => "high",
+			// we apture for later
+			ReasoningEffort::Budget(val) => {
+				budget = Some(*val); // not very elegant
+				""
+			}
+			ReasoningEffort::None => "",
+		};
+
+		// if we have an effort, we set it
+		if !effort.is_empty() {
+			payload.x_insert(
+				"output_config",
+				json!({
+					"effort": effort
+				}),
+			)?;
+		}
 	}
+
+	// -- if support adaptive, we add it (with the eventual budget tokens)
+	// if not (but support effort), it should be fined without the thinking object.
+	if support_adaptive {
+		let thinking = match budget {
+			Some(budget) => json!({
+						"type": "adaptive",
+						"budget_tokens": budget // if None, should be ok.
+			}),
+			None => json!({
+				"type": "adaptive"}),
+		};
+
+		// if support adaptive, we set the thinking type to "adaptive" and let the model decide how to use the budget (if any)
+		payload.x_insert("thinking", thinking)?;
+	}
+
+	// -- If it does not support effort, fall back on the legacy with with budget
+	if !support_effort {
+		let thinking_budget = match effort {
+			ReasoningEffort::None => None,
+			ReasoningEffort::Budget(budget) => Some(*budget),
+			ReasoningEffort::Low | ReasoningEffort::Minimal => Some(REASONING_LOW),
+			ReasoningEffort::Medium => Some(REASONING_MEDIUM),
+			ReasoningEffort::High | ReasoningEffort::Max => Some(REASONING_HIGH),
+		};
+
+		if let Some(thinking_budget) = thinking_budget {
+			payload.x_insert(
+				"thinking",
+				json!({
+					"type": "enabled",
+					"budget_tokens": thinking_budget
+				}),
+			)?;
+		}
+	}
+
 	Ok(())
 }
 
@@ -58,25 +123,71 @@ const MAX_TOKENS_8K: u32 = 8192; // claude-3-5-sonnet, claude-3-5-haiku
 const MAX_TOKENS_4K: u32 = 4096; // claude-3-opus, claude-3-haiku
 
 const ANTHROPIC_VERSION: &str = "2023-06-01";
-const MODELS: &[&str] = &["claude-opus-4-5", "claude-sonnet-4-5", "claude-haiku-4-5"];
 
 impl AnthropicAdapter {
 	pub const API_KEY_DEFAULT_ENV_NAME: &str = "ANTHROPIC_API_KEY";
+
+	pub(in crate::adapter::adapters) async fn list_model_names_for_end_target(
+		kind: AdapterKind,
+		endpoint: Endpoint,
+		auth: AuthData,
+	) -> Result<Vec<String>> {
+		// -- url
+		let base_url = endpoint.base_url();
+		let url = format!("{base_url}models");
+
+		// -- auth / headers
+		let api_key = auth.single_key_value().ok();
+		let headers = api_key
+			.map(|api_key| {
+				Headers::from(vec![
+					("x-api-key".to_string(), api_key),
+					("anthropic-version".to_string(), ANTHROPIC_VERSION.to_string()),
+				])
+			})
+			.unwrap_or_default();
+
+		// -- Exec request
+		let web_c = crate::webc::WebClient::default();
+		let mut res = web_c
+			.do_get(&url, &headers)
+			.await
+			.map_err(|webc_error| crate::Error::WebAdapterCall {
+				adapter_kind: kind,
+				webc_error,
+			})?;
+
+		// -- Format result
+		let mut models: Vec<String> = Vec::new();
+
+		if let Value::Array(models_value) = res.body.x_take("data")? {
+			for mut model in models_value {
+				let model_name: String = model.x_take("id")?;
+				models.push(model_name);
+			}
+		}
+
+		Ok(models)
+	}
 }
 
 impl Adapter for AnthropicAdapter {
+	const DEFAULT_API_KEY_ENV_NAME: Option<&'static str> = Some(Self::API_KEY_DEFAULT_ENV_NAME);
+
 	fn default_endpoint() -> Endpoint {
 		const BASE_URL: &str = "https://api.anthropic.com/v1/";
 		Endpoint::from_static(BASE_URL)
 	}
 
 	fn default_auth() -> AuthData {
-		AuthData::from_env(Self::API_KEY_DEFAULT_ENV_NAME)
+		match Self::DEFAULT_API_KEY_ENV_NAME {
+			Some(env_name) => AuthData::from_env(env_name),
+			None => AuthData::None,
+		}
 	}
 
-	/// Note: For now, it returns the common models (see above)
-	async fn all_model_names(_kind: AdapterKind) -> Result<Vec<String>> {
-		Ok(MODELS.iter().map(|s| s.to_string()).collect())
+	async fn all_model_names(kind: AdapterKind, endpoint: Endpoint, auth: AuthData) -> Result<Vec<String>> {
+		Self::list_model_names_for_end_target(kind, endpoint, auth).await
 	}
 
 	fn get_service_url(_model: &ModelIden, service_type: ServiceType, endpoint: Endpoint) -> Result<String> {
@@ -140,6 +251,7 @@ impl Adapter for AnthropicAdapter {
 						"low" => Some(ReasoningEffort::Low),
 						"medium" => Some(ReasoningEffort::Medium),
 						"high" => Some(ReasoningEffort::High),
+						"max" => Some(ReasoningEffort::Max),
 						_ => None,
 					};
 					// create the model name if there was a `-..` reasoning suffix
@@ -172,37 +284,7 @@ impl Adapter for AnthropicAdapter {
 
 		// -- Set the reasoning effort
 		if let Some(computed_reasoning_effort) = computed_reasoning_effort {
-			// DOC: https://platform.claude.com/docs/en/build-with-claude/effort
-			// - Effort parameter: Controls how Claude spends all tokens—including thinking tokens, text responses, and tool calls
-			// - Thinking token budget: Sets a maximum limit on thinking tokens specifically
-			// For best performance on complex reasoning tasks, use high effort (the default) with a high thinking token budget.
-			// This allows Claude to think thoroughly and provide comprehensive responses.
-
-			// In short, should use both thinking budget and effort
-
-			// -- if opus-4-5 then, we set the anthropic effort
-			if model_name.contains("opus-4-5") {
-				let effort = match computed_reasoning_effort {
-					ReasoningEffort::Minimal => "low",
-					ReasoningEffort::Low => "low",
-					ReasoningEffort::Medium => "medium",
-					ReasoningEffort::High => "high",
-					// -- for now, will not set
-					ReasoningEffort::Budget(_) => "",
-					ReasoningEffort::None => "",
-				};
-				if !effort.is_empty() {
-					payload.x_insert(
-						"output_config",
-						json!({
-							"effort": effort
-						}),
-					)?;
-				}
-			}
-
-			// -- All models, including opus-4-5, we see the thinking budget
-			insert_anthropic_thinking_budget_value(&mut payload, &computed_reasoning_effort)?;
+			insert_anthropic_reasoning(&mut payload, model_name, &computed_reasoning_effort)?;
 		}
 
 		// -- Add supported ChatOptions
@@ -263,6 +345,11 @@ impl Adapter for AnthropicAdapter {
 		let usage = body.x_take::<Value>("usage");
 
 		let usage = usage.map(Self::into_usage).unwrap_or_default();
+		let stop_reason = body
+			.x_take::<Option<String>>("stop_reason")
+			.ok()
+			.flatten()
+			.map(StopReason::from);
 
 		// -- Capture the content
 		let mut content: MessageContent = MessageContent::default();
@@ -275,8 +362,8 @@ impl Adapter for AnthropicAdapter {
 		let mut reasoning_content: Vec<String> = Vec::new();
 
 		for mut item in json_content_items {
-			let typ: &str = item.x_get_as("type")?;
-			match typ {
+			let typ: String = item.x_take("type")?;
+			match typ.as_ref() {
 				"text" => {
 					let part = ContentPart::from_text(item.x_take::<String>("text")?);
 					content.push(part);
@@ -297,7 +384,11 @@ impl Adapter for AnthropicAdapter {
 					let part = ContentPart::ToolCall(tool_call);
 					content.push(part);
 				}
-				_ => (),
+				other_typ => {
+					// insert it back
+					item.x_insert("type", other_typ)?;
+					content.push(ContentPart::from_custom(item, Some(model_iden.clone())))
+				}
 			}
 		}
 
@@ -312,6 +403,7 @@ impl Adapter for AnthropicAdapter {
 			reasoning_content,
 			model_iden,
 			provider_model_iden,
+			stop_reason,
 			usage,
 			captured_raw_body: None, // Set by the client exec_chat
 		})
@@ -518,6 +610,9 @@ impl AnthropicAdapter {
 									}));
 								}
 								ContentPart::ThoughtSignature(_) => {}
+								ContentPart::ReasoningContent(_) => {}
+								// Custom are ignored for this logic
+								ContentPart::Custom(_) => {}
 							}
 						}
 						let values = apply_cache_control_to_parts(cache_control.as_ref(), values);
@@ -551,6 +646,9 @@ impl AnthropicAdapter {
 							ContentPart::Binary(_) => {}
 							ContentPart::ToolResponse(_) => {}
 							ContentPart::ThoughtSignature(_) => {}
+							ContentPart::ReasoningContent(_) => {}
+							// Custom are ignored for this logic
+							ContentPart::Custom(_) => {}
 						}
 					}
 
@@ -619,32 +717,79 @@ impl AnthropicAdapter {
 		};
 
 		// -- Process the tools
-		let tools = chat_req.tools.map(|tools| {
-			tools
-				.into_iter()
-				.map(|tool| {
-					// TODO: Need to handle the error correctly
-					// TODO: Needs to have a custom serializer (tool should not have to match to a provider)
-					// NOTE: Right now, low probability, so we just return null if cannot convert to value.
-					let mut tool_value = json!({
-						"name": tool.name,
-						"input_schema": tool.schema,
-					});
 
-					if let Some(description) = tool.description {
-						// TODO: need to handle error
-						let _ = tool_value.x_insert("description", description);
-					}
-					tool_value
-				})
-				.collect::<Vec<Value>>()
-		});
+		let tools: Option<Vec<Value>> = chat_req
+			.tools
+			.map(|tools| {
+				tools
+					.into_iter()
+					.map(Self::tool_to_anthropic_tool)
+					.collect::<Result<Vec<Value>>>()
+			})
+			.transpose()?;
 
 		Ok(AnthropicRequestParts {
 			system,
 			messages,
 			tools,
 		})
+	}
+
+	fn tool_to_anthropic_tool(tool: Tool) -> Result<Value> {
+		let Tool {
+			name,
+			description,
+			schema,
+			config,
+		} = tool;
+
+		let name = match name {
+			ToolName::WebSearch => "web_search".to_string(),
+			ToolName::Custom(name) => name,
+		};
+
+		let mut tool_value = json!({"name": name});
+
+		// -- Add type for builtin tool
+		#[allow(clippy::single_match)] // will have more
+		match name.as_str() {
+			"web_search" => {
+				tool_value.x_insert("type", "web_search_20250305")?;
+			}
+			_ => (),
+		}
+
+		// NOTE: Fo now, if tool_value.type then, assume bultin and set config as propertie
+		if tool_value.get("type").is_some() {
+			if let Some(config) = config {
+				match config {
+					ToolConfig::WebSearch(config) => {
+						if let Some(max_uses) = config.max_uses {
+							let _ = tool_value.x_insert("max_uses", max_uses);
+						}
+						if let Some(allowed_domains) = config.allowed_domains {
+							let _ = tool_value.x_insert("allowed_domains", allowed_domains);
+						}
+						if let Some(blocked_domains) = config.blocked_domains {
+							let _ = tool_value.x_insert("blocked_domains", blocked_domains);
+						}
+					}
+					// if custom, we assume we flatten the config properties since we are in a builtin
+					ToolConfig::Custom(config) => {
+						// NOTE: For now, ignore if not object
+						tool_value.x_merge(config)?;
+					}
+				}
+			}
+		} else {
+			tool_value.x_insert("input_schema", schema)?;
+			if let Some(description) = description {
+				// TODO: need to handle error
+				let _ = tool_value.x_insert("description", description);
+			}
+		}
+
+		Ok(tool_value)
 	}
 }
 

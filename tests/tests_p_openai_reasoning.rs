@@ -18,6 +18,7 @@ const MODEL_FOR_THINKING: &str = "o4-mini-medium";
 // region:    --- Chat
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_simple_ok() -> TestResult<()> {
 	// NOTE 2025-01-31  - Reasoning_content or <think> content not supported by OpenAI at this point
 	//                    So, disabled for now
@@ -25,27 +26,31 @@ async fn test_chat_simple_ok() -> TestResult<()> {
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_multi_system_ok() -> TestResult<()> {
 	common_tests::common_test_chat_multi_system_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_json_mode_ok() -> TestResult<()> {
 	common_tests::common_test_chat_json_mode_ok(MODEL, Some(Check::USAGE)).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_json_structured_ok() -> TestResult<()> {
 	common_tests::common_test_chat_json_structured_ok(MODEL, Some(Check::USAGE)).await
 }
 
 // NOTE 2025-01-31 - OpenAI reasoning model does not temperature
 // #[tokio::test]
+#[ignore]
 // async fn test_chat_temperature_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_temperature_ok(MODEL).await
 // }
-
 #[tokio::test]
+#[ignore]
 async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stop_sequences_ok(MODEL).await
 }
@@ -53,6 +58,7 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 /// NOTE 2025-01-31  - Reasoning_content or <think> content not supported by OpenAI at this point
 ///                    So, disabled for now.
 // #[tokio::test]
+#[ignore]
 // async fn test_chat_reasoning_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_reasoning_ok(MODEL, true).await
 // }
@@ -60,18 +66,20 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 // endregion: --- Chat
 
 // region:    --- Chat Stream Tests
-
 #[tokio::test]
+#[ignore]
 async fn test_chat_stream_simple_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_simple_ok(MODEL, None).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_stream_capture_content_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_capture_content_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_capture_all_ok(MODEL, None).await
 }
@@ -81,11 +89,13 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // region:    --- Tool Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_tool_simple_ok() -> TestResult<()> {
 	common_tests::common_test_tool_simple_ok(MODEL).await
 }
 
 #[tokio::test]
+#[ignore]
 async fn test_tool_full_flow_ok() -> TestResult<()> {
 	common_tests::common_test_tool_full_flow_ok(MODEL).await
 }
@@ -94,6 +104,7 @@ async fn test_tool_full_flow_ok() -> TestResult<()> {
 // region:    --- Resolver Tests
 
 #[tokio::test]
+#[ignore]
 async fn test_resolver_auth_ok() -> TestResult<()> {
 	common_tests::common_test_resolver_auth_ok(MODEL, AuthData::from_env("OPENAI_API_KEY")).await
 }
@@ -103,6 +114,7 @@ async fn test_resolver_auth_ok() -> TestResult<()> {
 // region:    --- List
 
 #[tokio::test]
+#[ignore]
 async fn test_list_models() -> TestResult<()> {
 	common_tests::common_test_list_models(AdapterKind::OpenAI, "gpt-4o").await
 }

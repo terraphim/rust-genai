@@ -1,7 +1,7 @@
 use crate::adapter::adapters::support::{StreamerCapturedData, StreamerOptions};
 use crate::adapter::gemini::{GeminiAdapter, GeminiChatResponse};
 use crate::adapter::inter_stream::{InterStreamEnd, InterStreamEvent};
-use crate::chat::{ChatOptionsSet, ToolCall};
+use crate::chat::{ChatOptionsSet, StopReason, ToolCall};
 use crate::webc::WebStream;
 use crate::{Error, ModelIden, Result};
 use serde_json::Value;
@@ -61,6 +61,7 @@ impl futures::Stream for GeminiStreamer {
 						"]" => {
 							let inter_stream_end = InterStreamEnd {
 								captured_usage: self.captured_data.usage.take(),
+								captured_stop_reason: self.captured_data.stop_reason.take().map(StopReason::from),
 								captured_text_content: self.captured_data.content.take(),
 								captured_reasoning_content: self.captured_data.reasoning_content.take(),
 								captured_tool_calls: self.captured_data.tool_calls.take(),
@@ -95,7 +96,16 @@ impl futures::Stream for GeminiStreamer {
 									}
 								};
 
-							let GeminiChatResponse { content, usage } = gemini_response;
+							let GeminiChatResponse {
+								content,
+								usage,
+								stop_reason,
+							} = gemini_response;
+
+							// -- Capture stop_reason if present (typically in the last chunk)
+							if stop_reason.is_some() {
+								self.captured_data.stop_reason = stop_reason;
+							}
 
 							// -- Extract text and toolcall
 							// WARNING: Assume that only ONE tool call per message (or take the last one)
@@ -110,6 +120,11 @@ impl futures::Stream for GeminiStreamer {
 										stream_reasoning_content = Some(reasoning)
 									}
 									GeminiChatContent::Text(text) => stream_text_content.push_str(&text),
+									GeminiChatContent::Binary(_) => {
+										// For now, we do not stream binary content, as Gemini may send binary content in multiple chunks and we don't want to emit incomplete binary data.
+										// Instead, we will capture the binary content in the captured_data and emit it at the end of the stream.
+										// We can consider adding a streaming event for binary content in the future if there is a use case for it.
+									}
 									GeminiChatContent::ToolCall(tool_call) => stream_tool_call = Some(tool_call),
 									GeminiChatContent::ThoughtSignature(thought) => stream_thought = Some(thought),
 								}
