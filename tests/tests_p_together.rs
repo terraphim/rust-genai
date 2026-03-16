@@ -67,7 +67,7 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 
 /// Caching does not seem to be supported for together (at least not reported)
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // #[serial(together)]
 // async fn test_chat_cache_implicit_simple_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_cache_implicit_simple_ok(MODEL).await
@@ -102,7 +102,7 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // region:    --- Binary Tests
 
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // #[serial(together)]
 // async fn test_chat_binary_image_url_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_url_ok(MODEL).await
@@ -111,7 +111,7 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // NOTE: Only found that Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8 was supporting image without returning
 //       invalid format, but the rendered image could not be viewed yet.
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // #[serial(together)]
 // async fn test_chat_binary_image_b64_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_b64_ok(MODEL_FOR_IMAGE).await
@@ -120,7 +120,7 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // NOT SUPPORTED YET
 
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // #[serial(together)]
 // #[ignore = "Binary PDF is currently not supported by TogetherAI."]
 // async fn test_chat_binary_pdf_b64_ok() -> TestResult<()> {
@@ -128,7 +128,7 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // }
 
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // #[serial(together)]
 // #[ignore = "Multiple binary payloads are currently not supported by TogetherAI."]
 // async fn test_chat_binary_multi_b64_ok() -> TestResult<()> {

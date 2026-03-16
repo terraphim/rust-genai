@@ -28,14 +28,14 @@ async fn test_chat_multi_system_ok() -> TestResult<()> {
 
 /// NOTE - Disable for now, not supported by xAI as of 2024-12-08
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_json_mode_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_json_mode_ok(MODEL, true).await
 // }
 //
 /// NOTE - Disable for now, not supported by xAI as of 2024-12-08
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_json_structured_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_json_structured_ok(MODEL, true).await
 // }
@@ -49,7 +49,7 @@ async fn test_chat_temperature_ok() -> TestResult<()> {
 /// NOTE - Disable for now, buggy as of 2024-12-08
 ///        Will return `the capital of england is **london` somehow
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_stop_sequences_ok(MODEL).await
 // }
@@ -83,7 +83,7 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // region:    --- Binary Tests
 
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // #[serial(xai)]
 // async fn test_chat_binary_image_url_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_url_ok(MODEL).await
@@ -96,14 +96,14 @@ async fn test_chat_binary_image_b64_ok() -> TestResult<()> {
 }
 
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // #[serial(xai)]
 // async fn test_chat_binary_pdf_b64_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_pdf_b64_ok(MODEL).await
 // }
 
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // #[serial(xai)]
 // async fn test_chat_binary_multi_b64_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_multi_binary_b64_ok(MODEL).await

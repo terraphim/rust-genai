@@ -52,8 +52,8 @@ async fn test_chat_stream_simple_ok() -> TestResult<()> {
 // NOTE 2024-06-23 - Occasionally, the last stream message sent by Cohere is malformed and cannot be parsed.
 //                   Will investigate further if requested.
 // #[tokio::test]
-#[ignore]
-#[serial(cohere)]
+// #[ignore]
+// #[serial(cohere)]
 // async fn test_chat_stream_capture_content_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_stream_capture_content_ok(MODEL).await
 // }

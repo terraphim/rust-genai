@@ -10,7 +10,7 @@ const MODEL: &str = "glm-z1-flash";
 
 // NOTE - Disabled for now, as the model does not add .reasoning_content. Instead, it uses a <think> tag, which is tested in test_chat_reasoning_normalize_ok as of 2025-07-08.
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_simple_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_simple_ok(MODEL, Some(Check::REASONING)).await
 // }
@@ -34,7 +34,7 @@ async fn test_chat_temperature_ok() -> TestResult<()> {
 
 /// NOTE - Disabled for now, as the model currently includes the stop sequences as the last sequences in the generation as of 2025-07-08.
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_stop_sequences_ok(MODEL).await
 // }
@@ -49,7 +49,7 @@ async fn test_chat_reasoning_normalize_ok() -> TestResult<()> {
 
 // NOTE - Disabled for now, as the model does not add .reasoning_content. Instead, it uses a <think> tag, which is tested in test_chat_reasoning_normalize_ok as of 2025-07-08.
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_stream_simple_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_stream_simple_ok(MODEL, Some(Check::REASONING)).await
 // }
@@ -61,7 +61,7 @@ async fn test_chat_stream_capture_content_ok() -> TestResult<()> {
 
 // NOTE - Disabled for now, as the model does not add .reasoning_content. Instead, it uses a <think> tag, which is tested in test_chat_reasoning_normalize_ok as of 2025-07-08.
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_stream_capture_all_ok(MODEL, Some(Check::REASONING)).await
 // }

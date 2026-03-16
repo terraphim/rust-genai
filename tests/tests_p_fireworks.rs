@@ -59,7 +59,7 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 
 /// Caching does not seem to be supported for fireworks (at leat not reported)
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_cache_implicit_simple_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_cache_implicit_simple_ok(MODEL).await
 // }
@@ -90,7 +90,7 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 // region:    --- Binary Tests
 
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_binary_image_url_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_url_ok(MODEL_IMAGE).await
 // }
@@ -103,13 +103,13 @@ async fn test_chat_binary_image_b64_ok() -> TestResult<()> {
 // PDF not supported for fireworks.ai
 
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_binary_pdf_b64_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_pdf_b64_ok(MODEL).await
 // }
 
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_binary_multi_b64_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_multi_binary_b64_ok(MODEL).await
 // }

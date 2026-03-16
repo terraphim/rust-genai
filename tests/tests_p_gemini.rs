@@ -68,7 +68,7 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 // NOTE: This should eventually work with the 2.5 Flash, but right now, we do not get the cached_tokens
 //       So, disabling
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_cache_implicit_simple_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_cache_implicit_simple_ok(MODEL).await
 // }
@@ -100,7 +100,7 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 
 // NOTE: Gemini does not seem to support URL
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_binary_image_url_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_image_url_ok(MODEL).await
 // }

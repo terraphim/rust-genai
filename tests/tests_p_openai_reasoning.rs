@@ -45,7 +45,7 @@ async fn test_chat_json_structured_ok() -> TestResult<()> {
 
 // NOTE 2025-01-31 - OpenAI reasoning model does not temperature
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_temperature_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_temperature_ok(MODEL).await
 // }
@@ -58,7 +58,7 @@ async fn test_chat_stop_sequences_ok() -> TestResult<()> {
 /// NOTE 2025-01-31  - Reasoning_content or <think> content not supported by OpenAI at this point
 ///                    So, disabled for now.
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_reasoning_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_reasoning_ok(MODEL, true).await
 // }

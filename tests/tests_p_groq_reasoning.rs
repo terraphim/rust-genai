@@ -26,7 +26,7 @@ async fn test_chat_multi_system_ok() -> TestResult<()> {
 
 // THis model does not seem to support json mode
 // #[tokio::test]
-#[ignore]
+// #[ignore]
 // async fn test_chat_json_mode_ok() -> TestResult<()> {
 // 	common_tests::common_test_chat_json_mode_ok(MODEL, Some(Check::USAGE)).await
 // }
