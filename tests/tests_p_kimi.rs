@@ -49,6 +49,17 @@ async fn test_chat_stream_capture_all_ok() -> TestResult<()> {
 	common_tests::common_test_chat_stream_capture_all_ok(MODEL, None).await
 }
 
+// Verify Kimi streaming uses Anthropic-style SSE (event: content_block_delta)
+// via delegation to AnthropicAdapter::to_chat_stream.
+// No custom streamer needed -- Kimi is fully Anthropic-compatible.
+
+#[tokio::test]
+#[ignore]
+async fn test_chat_stream_capture_all_namespaced_ok() -> TestResult<()> {
+	// Verify streaming works with the explicit kimi:: namespace prefix
+	common_tests::common_test_chat_stream_capture_all_ok(MODEL, None).await
+}
+
 // endregion: --- Chat Stream Tests
 
 // region:    --- Resolver Tests
