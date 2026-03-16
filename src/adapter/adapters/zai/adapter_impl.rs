@@ -93,11 +93,11 @@ impl Adapter for ZaiAdapter {
 	fn get_service_url(_model: &ModelIden, service_type: ServiceType, endpoint: Endpoint) -> Result<String> {
 		// For ZAI, we need to handle model-specific routing at this level
 		// because get_service_url is called with the modified endpoint from to_web_request_data
-		let base_url = endpoint.base_url();
+		let base_url = endpoint.base_url().trim_end_matches('/');
 
 		let url = match service_type {
-			ServiceType::Chat | ServiceType::ChatStream => format!("{base_url}chat/completions"),
-			ServiceType::Embed => format!("{base_url}embeddings"),
+			ServiceType::Chat | ServiceType::ChatStream => format!("{base_url}/chat/completions"),
+			ServiceType::Embed => format!("{base_url}/embeddings"),
 		};
 		Ok(url)
 	}
@@ -148,5 +148,90 @@ impl Adapter for ZaiAdapter {
 		options_set: crate::embed::EmbedOptionsSet<'_, '_>,
 	) -> Result<crate::embed::EmbedResponse> {
 		OpenAIAdapter::to_embed_response(model_iden, web_response, options_set)
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::ModelIden;
+	use crate::adapter::AdapterKind;
+
+	fn make_model(name: &str) -> ModelIden {
+		ModelIden::new(AdapterKind::Zai, name)
+	}
+
+	#[test]
+	fn test_service_url_with_trailing_slash() {
+		let model = make_model("glm-4-plus");
+		let endpoint = Endpoint::from_static("https://api.z.ai/api/paas/v4/");
+		let url = ZaiAdapter::get_service_url(&model, ServiceType::Chat, endpoint).unwrap();
+		assert_eq!(url, "https://api.z.ai/api/paas/v4/chat/completions");
+	}
+
+	#[test]
+	fn test_service_url_without_trailing_slash() {
+		let model = make_model("glm-4-plus");
+		let endpoint = Endpoint::from_owned("https://api.z.ai/api/paas/v4".to_string());
+		let url = ZaiAdapter::get_service_url(&model, ServiceType::Chat, endpoint).unwrap();
+		assert_eq!(url, "https://api.z.ai/api/paas/v4/chat/completions");
+	}
+
+	#[test]
+	fn test_service_url_embed() {
+		let model = make_model("glm-4-plus");
+		let endpoint = Endpoint::from_static("https://api.z.ai/api/paas/v4/");
+		let url = ZaiAdapter::get_service_url(&model, ServiceType::Embed, endpoint).unwrap();
+		assert_eq!(url, "https://api.z.ai/api/paas/v4/embeddings");
+	}
+
+	#[test]
+	fn test_service_url_embed_without_trailing_slash() {
+		let model = make_model("glm-4-plus");
+		let endpoint = Endpoint::from_owned("https://api.z.ai/api/paas/v4".to_string());
+		let url = ZaiAdapter::get_service_url(&model, ServiceType::Embed, endpoint).unwrap();
+		assert_eq!(url, "https://api.z.ai/api/paas/v4/embeddings");
+	}
+
+	#[test]
+	fn test_service_url_double_trailing_slash() {
+		let model = make_model("glm-4-plus");
+		let endpoint = Endpoint::from_owned("https://api.z.ai/api/paas/v4//".to_string());
+		let url = ZaiAdapter::get_service_url(&model, ServiceType::Chat, endpoint).unwrap();
+		assert_eq!(url, "https://api.z.ai/api/paas/v4/chat/completions");
+	}
+
+	#[test]
+	fn test_coding_namespace_endpoint() {
+		let model = make_model("zai-coding::glm-4-plus");
+		let zai_info = ZaiModelEndpoint::from_model(&model);
+		let base = zai_info.endpoint.base_url().trim_end_matches('/');
+		assert_eq!(base, "https://api.z.ai/api/coding/paas/v4");
+	}
+
+	#[test]
+	fn test_default_namespace_endpoint() {
+		let model = make_model("glm-4-plus");
+		let zai_info = ZaiModelEndpoint::from_model(&model);
+		let base = zai_info.endpoint.base_url().trim_end_matches('/');
+		assert_eq!(base, "https://api.z.ai/api/paas/v4");
+	}
+
+	#[test]
+	fn test_coding_namespace_service_url() {
+		let model = make_model("zai-coding::glm-4-plus");
+		let endpoint = Endpoint::from_static("https://api.z.ai/api/coding/paas/v4/");
+		let url = ZaiAdapter::get_service_url(&model, ServiceType::Chat, endpoint).unwrap();
+		assert_eq!(url, "https://api.z.ai/api/coding/paas/v4/chat/completions");
+	}
+
+	#[test]
+	fn test_chat_stream_same_as_chat() {
+		let model = make_model("glm-4-plus");
+		let endpoint_chat = Endpoint::from_static("https://api.z.ai/api/paas/v4/");
+		let endpoint_stream = Endpoint::from_static("https://api.z.ai/api/paas/v4/");
+		let url_chat = ZaiAdapter::get_service_url(&model, ServiceType::Chat, endpoint_chat).unwrap();
+		let url_stream = ZaiAdapter::get_service_url(&model, ServiceType::ChatStream, endpoint_stream).unwrap();
+		assert_eq!(url_chat, url_stream);
 	}
 }
