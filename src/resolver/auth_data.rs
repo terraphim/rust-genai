@@ -63,6 +63,8 @@ impl AuthData {
 				Ok(value)
 			}
 			AuthData::Key(value) => Ok(value.to_string()),
+			// No-auth providers return an empty string
+			AuthData::None => Ok(String::new()),
 			_ => Err(Error::ResolverAuthDataNotSingleValue),
 		}
 	}
@@ -125,6 +127,25 @@ mod tests {
 		};
 		let value = auth.single_key_value().unwrap();
 		assert_eq!(value, "");
+	}
+	#[test]
+	fn test_none_single_key_value_returns_empty() {
+		let auth = AuthData::None;
+		let value = auth.single_key_value().unwrap();
+		assert_eq!(value, "");
+	}
+
+	#[test]
+	fn test_none_debug() {
+		let auth = AuthData::None;
+		let debug = format!("{:?}", auth);
+		assert_eq!(debug, "None");
+	}
+
+	#[test]
+	fn test_multi_keys_single_key_value_errors() {
+		let auth = AuthData::from_multi(HashMap::new());
+		assert!(auth.single_key_value().is_err());
 	}
 }
 
