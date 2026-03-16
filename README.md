@@ -1,6 +1,6 @@
 # genai, Multi-AI Providers Library for Rust
 
-Currently natively supports: **OpenAI**, **Anthropic**, **Gemini**, **xAI**, **Ollama**, **Groq**, **DeepSeek**, **Cohere**, **Together**, **Fireworks**, **Nebius**, **Mimo**, **Zai** (Zhipu AI), **BigModel**.
+Currently natively supports: **OpenAI**, **Anthropic**, **Gemini**, **xAI**, **Ollama**, **Groq**, **DeepSeek**, **Cohere**, **Together**, **Fireworks**, **Nebius**, **Mimo**, **Zai** (Zhipu AI), **BigModel**, **Kimi** (Moonshot AI), **Bedrock** (AWS), **Cerebras**, **OpenRouter**.
 
 Also supports a custom URL with `ServiceTargetResolver` (see [examples/c06-target-resolver.rs](examples/c06-target-resolver.rs)).
 
@@ -14,20 +14,21 @@ Also supports a custom URL with `ServiceTargetResolver` (see [examples/c06-targe
 
 Provides a single, ergonomic API for many generative AI providers, such as Anthropic, OpenAI, Gemini, xAI, Ollama, Groq, and more.
 
-**NOTE:** Big update with **v0.5.0**: New adapters (BigModel, MIMO), Gemini Thinking support, Anthropic Reasoning Effort, and a more robust internal streaming engine.
+**NOTE:** This is the **Terraphim fork** synced to upstream **v0.6.0-beta.8**, adding Kimi (Moonshot AI), AWS Bedrock, Cerebras, and OpenRouter adapters, plus SSE streaming improvements.
 
 [Docs for LLMs](doc/for-llm/api-reference-for-llm.md) | [CHANGELOG](CHANGELOG.md) | [BIG THANKS](BIG-THANKS.md)
 
-## v0.5.x - (2026-01-09...)
+## v0.6.0-beta.8-fork (Terraphim)
 
 - **What's new**:
-    - **New Adapters**: BigModel.cn and the MIMO model adapter (thanks to [Akagi201](https://github.com/Akagi201)).
-    - **zai: changed namespace strategy**, with (zai:: for default, and zai-codding:: for subscription, same adapter)
-    - **Gemini Thinking & Thought**: Full support for Gemini Thought signatures (thanks to [Himmelschmidt](https://github.com/Himmelschmidt)) and thinking levels.
-    - **Reasoning Effort Control**: Support for `ReasoningEffort` for Anthropic (Claude 3.7/4.5) and Gemini (Thinking levels), including `ReasoningEffort::None`.
-    - **Content & Binary Improvements**: Enhanced binary/PDF API and size tracking.
-    - **Internal Stream Refactor**: Switched to a unified `EventSourceStream` and `WebStream` for better reliability and performance across all providers.
-    - **Dependency Upgrade**: Now using `reqwest 0.13`.
+    - **Upstream sync**: Merged upstream v0.6.0-beta.8 breaking changes (Adapter trait, AuthData::None, StopReason, ChatMessage::tool_response, ReasoningContent).
+    - **New Adapter: Kimi** (Moonshot AI): Full chat and streaming support via `kimi::` namespace.
+    - **New Adapter: Bedrock** (AWS): SigV4-signed requests for AWS Bedrock models.
+    - **New Adapter: Cerebras**: Fast inference provider support.
+    - **New Adapter: OpenRouter**: Multi-provider routing via `openrouter::` namespace.
+    - **Zai URL fix**: Resolved trailing slash issues in Zai adapter endpoint construction.
+    - **SSE streaming improvements**: Adapter-specific SSE parsing for Kimi and Zai streaming responses.
+    - **Bearer token auth**: Added BearerToken variant to AuthData for providers requiring it.
 - **What's still awesome**:
     - Normalized and ergonomic Chat API across all major providers.
     - Native protocol support for Gemini and Anthropic protocols (Reasoning/Thinking controls).
