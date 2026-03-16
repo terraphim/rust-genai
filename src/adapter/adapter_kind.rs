@@ -12,6 +12,7 @@ use crate::adapter::deepseek::DeepSeekAdapter;
 use crate::adapter::fireworks::FireworksAdapter;
 use crate::adapter::gemini::GeminiAdapter;
 use crate::adapter::groq::GroqAdapter;
+use crate::adapter::kimi::KimiAdapter;
 use crate::adapter::mimo::MimoAdapter;
 use crate::adapter::nebius::NebiusAdapter;
 use crate::adapter::openai::OpenAIAdapter;
@@ -66,6 +67,8 @@ pub enum AdapterKind {
 	Cerebras,
 	/// AWS Bedrock (uses Converse API with Bearer token authentication)
 	Bedrock,
+	/// Kimi / Moonshot AI (Anthropic-compatible protocol)
+	Kimi,
 	/// For Zhipu (legacy, kept for backwards compatibility)
 	Zhipu,
 }
@@ -94,6 +97,7 @@ impl AdapterKind {
 			AdapterKind::Ollama => "Ollama",
 			AdapterKind::Cerebras => "Cerebras",
 			AdapterKind::Bedrock => "Bedrock",
+			AdapterKind::Kimi => "Kimi",
 			AdapterKind::Zhipu => "Zhipu",
 		}
 	}
@@ -120,6 +124,7 @@ impl AdapterKind {
 			AdapterKind::Ollama => "ollama",
 			AdapterKind::Cerebras => "cerebras",
 			AdapterKind::Bedrock => "bedrock",
+			AdapterKind::Kimi => "kimi",
 			AdapterKind::Zhipu => "zhipu",
 		}
 	}
@@ -145,6 +150,7 @@ impl AdapterKind {
 			"ollama" => Some(AdapterKind::Ollama),
 			"cerebras" => Some(AdapterKind::Cerebras),
 			"bedrock" => Some(AdapterKind::Bedrock),
+			"kimi" => Some(AdapterKind::Kimi),
 			"zhipu" => Some(AdapterKind::Zhipu),
 			_ => None,
 		}
@@ -175,6 +181,7 @@ impl AdapterKind {
 			AdapterKind::Ollama => OllamaAdapter::DEFAULT_API_KEY_ENV_NAME,
 			AdapterKind::Cerebras => CerebrasAdapter::DEFAULT_API_KEY_ENV_NAME,
 			AdapterKind::Bedrock => BedrockAdapter::DEFAULT_API_KEY_ENV_NAME,
+			AdapterKind::Kimi => KimiAdapter::DEFAULT_API_KEY_ENV_NAME,
 			AdapterKind::Zhipu => ZhipuAdapter::DEFAULT_API_KEY_ENV_NAME,
 		}
 	}
