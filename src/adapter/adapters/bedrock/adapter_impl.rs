@@ -8,7 +8,7 @@ use crate::adapter::adapters::support::get_api_key;
 use crate::adapter::{Adapter, AdapterKind, ServiceType, WebRequestData};
 use crate::chat::{
 	Binary, BinarySource, ChatOptionsSet, ChatRequest, ChatResponse, ChatRole, ChatStream, ChatStreamResponse,
-	ContentPart, MessageContent, ToolCall, Usage,
+	ContentPart, MessageContent, StopReason, ToolCall, Usage,
 };
 use crate::resolver::{AuthData, Endpoint};
 use crate::webc::{EventSourceStream, WebResponse};
@@ -253,6 +253,9 @@ impl BedrockAdapter {
 						}
 					}));
 				}
+				ContentPart::ReasoningContent(_) => {
+					// Reasoning content is not sent back to Bedrock in requests
+				}
 				_ => {
 					// Skip unsupported content types for the given role
 				}
@@ -388,7 +391,9 @@ impl Adapter for BedrockAdapter {
 		let usage = body.x_take::<Value>("usage");
 		let usage = usage.map(Self::into_usage).unwrap_or_default();
 
-		// Extract provider model name from stopReason metadata if available
+		// Extract stop reason from Bedrock response
+		let stop_reason = body.x_take::<Option<String>>("stopReason").ok().flatten().map(StopReason::from);
+
 		let provider_model_iden = model_iden.clone();
 
 		// Process output message
@@ -429,7 +434,7 @@ impl Adapter for BedrockAdapter {
 			reasoning_content,
 			model_iden,
 			provider_model_iden,
-			stop_reason: None,
+			stop_reason,
 			usage,
 			captured_raw_body,
 		})

@@ -5,7 +5,7 @@
 
 use crate::adapter::adapters::support::{StreamerCapturedData, StreamerOptions};
 use crate::adapter::inter_stream::{InterStreamEnd, InterStreamEvent};
-use crate::chat::{ChatOptionsSet, ToolCall, Usage};
+use crate::chat::{ChatOptionsSet, StopReason, ToolCall, Usage};
 use crate::webc::{Event, EventSourceStream};
 use crate::{Error, ModelIden, Result};
 use serde_json::Value;
@@ -197,7 +197,11 @@ impl futures::Stream for BedrockStreamer {
 					}
 
 					// Handle messageStop event
-					if data.get("messageStop").is_some() {
+					if let Some(message_stop) = data.get("messageStop") {
+						// Capture the stop reason from messageStop
+						if let Some(reason) = message_stop.get("stopReason").and_then(|v| v.as_str()) {
+							self.captured_data.stop_reason = Some(reason.to_string());
+						}
 						// Message is complete, but we still wait for metadata
 						continue;
 					}
@@ -215,7 +219,7 @@ impl futures::Stream for BedrockStreamer {
 
 						let inter_stream_end = InterStreamEnd {
 							captured_usage,
-							captured_stop_reason: None,
+							captured_stop_reason: self.captured_data.stop_reason.take().map(StopReason::from),
 							captured_text_content: self.captured_data.content.take(),
 							captured_reasoning_content: self.captured_data.reasoning_content.take(),
 							captured_tool_calls: self.captured_data.tool_calls.take(),
@@ -244,7 +248,7 @@ impl futures::Stream for BedrockStreamer {
 						// Return what we have captured so far
 						let inter_stream_end = InterStreamEnd {
 							captured_usage: self.captured_data.usage.take(),
-							captured_stop_reason: None,
+							captured_stop_reason: self.captured_data.stop_reason.take().map(StopReason::from),
 							captured_text_content: self.captured_data.content.take(),
 							captured_reasoning_content: self.captured_data.reasoning_content.take(),
 							captured_tool_calls: self.captured_data.tool_calls.take(),
