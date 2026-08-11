@@ -198,16 +198,19 @@ impl Adapter for AnthropicAdapter {
 				// of whether the caller passed `https://api.anthropic.com/v1/`
 				// (with trailing slash), `https://api.anthropic.com/v1`
 				// (no slash), or a custom gateway like
-				// `https://api.minimax.io/anthropic` where the `/v1/messages`
-				// suffix isn't part of the host. Previously this used
+				// `https://api.minimax.io/anthropic/v1` where the `/v1` is the
+				// version segment and `messages` should be appended with a
+				// slash separator. Previously this used
 				// `format!("{base_url}messages")` which produced malformed URLs
-				// like `https://api.minimax.io/anthropicmessages` for
-				// Anthropic-compat gateways without `/v1/` in their base URL.
+				// like `https://api.minimax.io/anthropic/v1messages` (404).
 				if base_url.ends_with("messages") {
 					base_url.to_string()
-				} else if base_url.ends_with("/v1/") || base_url.ends_with("/v1") {
-					// Already includes the /v1 version segment; just append messages.
+				} else if base_url.ends_with("/v1/") {
+					// Legacy Anthropic shape: trailing slash already present, just append messages.
 					format!("{base_url}messages")
+				} else if base_url.ends_with("/v1") {
+					// Version segment without trailing slash — need a slash separator.
+					format!("{base_url}/messages")
 				} else {
 					// No version segment; append the canonical /v1/messages.
 					format!("{}/v1/messages", base_url.trim_end_matches('/'))
@@ -994,8 +997,10 @@ mod tests {
 	fn anthropic_base_url_with_v1_no_trailing_slash_works() {
 		// Some gateways (e.g. terraphim-llm-proxy's MiniMax provider after
 		// the 2026-08-11 config fix) pass `…/v1` without a trailing slash.
+		// We must insert a `/` separator so the path is `/v1/messages` rather
+		// than `/v1messages` (which 404s).
 		let url = make_url("https://api.minimax.io/anthropic/v1", ServiceType::Chat);
-		assert_eq!(url, "https://api.minimax.io/anthropic/v1messages");
+		assert_eq!(url, "https://api.minimax.io/anthropic/v1/messages");
 	}
 
 	#[test]
