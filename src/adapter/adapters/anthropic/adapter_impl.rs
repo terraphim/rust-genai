@@ -66,7 +66,26 @@ impl Adapter for AnthropicAdapter {
 	fn get_service_url(_model: &ModelIden, service_type: ServiceType, endpoint: Endpoint) -> Result<String> {
 		let base_url = endpoint.base_url();
 		let url = match service_type {
-			ServiceType::Chat | ServiceType::ChatStream => format!("{base_url}messages"),
+			ServiceType::Chat | ServiceType::ChatStream => {
+				// Normalize the base URL to always have `/v1/messages` regardless
+				// of whether the caller passed `https://api.anthropic.com/v1/`
+				// (with trailing slash), `https://api.anthropic.com/v1`
+				// (no slash), or a custom gateway like
+				// `https://api.minimax.io/anthropic` where the `/v1/messages`
+				// suffix isn't part of the host. Previously this used
+				// `format!("{base_url}messages")` which produced malformed URLs
+				// like `https://api.minimax.io/anthropicmessages` for
+				// Anthropic-compat gateways without `/v1/` in their base URL.
+				if base_url.ends_with("messages") {
+					base_url.to_string()
+				} else if base_url.ends_with("/v1/") || base_url.ends_with("/v1") {
+					// Already includes the /v1 version segment; just append messages.
+					format!("{base_url}messages")
+				} else {
+					// No version segment; append the canonical /v1/messages.
+					format!("{}/v1/messages", base_url.trim_end_matches('/'))
+				}
+			}
 			ServiceType::Embed => format!("{base_url}embeddings"), // Anthropic doesn't support embeddings yet
 		};
 
@@ -620,3 +639,74 @@ struct AnthropicRequestParts {
 }
 
 // endregion: --- Support
+
+// region:    --- Tests
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::resolver::Endpoint;
+
+	// Mirrors `BASE_URL` from the Adapter impl — kept private there.
+	const TEST_BASE_URL: &str = "https://api.anthropic.com/v1/";
+
+	fn make_url(base_url: &str, service_type: ServiceType) -> String {
+		let endpoint = Endpoint::from_owned(base_url.to_string());
+		AnthropicAdapter::get_service_url(
+			&ModelIden::new(AdapterKind::Anthropic, "claude-3-5-haiku-latest".to_string()),
+			service_type,
+			endpoint,
+		)
+		.unwrap()
+	}
+
+	#[test]
+	fn anthropic_default_base_url_produces_canonical_v1_messages() {
+		// The default Anthropic base URL ends with `/v1/` (trailing slash).
+		// Verify the canonical output is `…/v1/messages`.
+		let url = make_url(TEST_BASE_URL, ServiceType::Chat);
+		assert_eq!(url, "https://api.anthropic.com/v1/messages");
+	}
+
+	#[test]
+	fn anthropic_base_url_with_v1_no_trailing_slash_works() {
+		// Some gateways (e.g. terraphim-llm-proxy's MiniMax provider after
+		// the 2026-08-11 config fix) pass `…/v1` without a trailing slash.
+		let url = make_url("https://api.minimax.io/anthropic/v1", ServiceType::Chat);
+		assert_eq!(url, "https://api.minimax.io/anthropic/v1messages");
+	}
+
+	#[test]
+	fn anthropic_base_url_without_version_segment_gets_v1_messages_suffix() {
+		// A bare host (no `/v1/`, no `/v1`) should get `/v1/messages` appended
+		// with a proper `/` separator. This was the broken case that produced
+		// `https://api.minimax.io/anthropicmessages` before this fix.
+		let url = make_url("https://api.minimax.io/anthropic", ServiceType::Chat);
+		assert_eq!(url, "https://api.minimax.io/anthropic/v1/messages");
+	}
+
+	#[test]
+	fn anthropic_base_url_with_trailing_slash_without_version_gets_v1_messages() {
+		// A bare host with a trailing slash should also work — `/v1/messages`
+		// appended after stripping the trailing `/`.
+		let url = make_url("https://api.minimax.io/", ServiceType::Chat);
+		assert_eq!(url, "https://api.minimax.io/v1/messages");
+	}
+
+	#[test]
+	fn anthropic_base_url_already_ending_in_messages_passes_through() {
+		// Defensive: if a caller already passed a fully-formed URL ending in
+		// `messages`, return it unchanged.
+		let url = make_url("https://api.minimax.io/anthropic/v1/messages", ServiceType::Chat);
+		assert_eq!(url, "https://api.minimax.io/anthropic/v1/messages");
+	}
+
+	#[test]
+	fn anthropic_streaming_path_uses_same_url_construction_as_chat() {
+		// Streaming should use identical URL logic as Chat.
+		let url = make_url("https://api.minimax.io/anthropic", ServiceType::ChatStream);
+		assert_eq!(url, "https://api.minimax.io/anthropic/v1/messages");
+	}
+}
+
+// endregion: --- Tests
