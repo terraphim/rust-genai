@@ -381,19 +381,30 @@ impl OpenAIAdapter {
 			tools
 				.into_iter()
 				.map(|tool| {
-					// TODO: Need to handle the error correctly
-					// TODO: Needs to have a custom serializer (tool should not have to match to a provider)
-					// NOTE: Right now, low probability, so, we just return null if cannot convert to value.
+					// `description` is optional in the OpenAI function schema, but
+					// `json!` turns `None` into an explicit `null`, and providers that
+					// validate the payload reject a null where a string is expected.
+					// Omit the key instead of emitting null.
+					//
+					// `parameters` is *required* to be a schema object, so a tool
+					// declared without one falls back to the empty object schema
+					// rather than serialising `null`.
+					let mut function = serde_json::Map::new();
+					function.insert("name".to_string(), json!(tool.name));
+					if let Some(description) = tool.description {
+						function.insert("description".to_string(), json!(description));
+					}
+					function.insert(
+						"parameters".to_string(),
+						tool.schema.unwrap_or_else(|| json!({"type": "object"})),
+					);
+					// TODO: If we need to support `strict: true` we need to add additionalProperties: false into the schema
+					//       above (like structured output)
+					function.insert("strict".to_string(), json!(false));
+
 					json!({
 						"type": "function",
-						"function": {
-							"name": tool.name,
-							"description": tool.description,
-							"parameters": tool.schema,
-							// TODO: If we need to support `strict: true` we need to add additionalProperties: false into the schema
-							//       above (like structured output)
-							"strict": false,
-						}
+						"function": Value::Object(function),
 					})
 				})
 				.collect::<Vec<Value>>()
@@ -466,6 +477,68 @@ mod tests {
 
 	fn test_model() -> ModelIden {
 		ModelIden::new(AdapterKind::OpenAI, "test-model")
+	}
+
+	fn tool_named(name: &str) -> crate::chat::Tool {
+		crate::chat::Tool::new(name.to_string())
+	}
+
+	fn serialised_tools(tools: Vec<crate::chat::Tool>) -> Vec<Value> {
+		let chat_req = ChatRequest::new(vec![ChatMessage::user("hi")]).with_tools(tools);
+		let parts = OpenAIAdapter::into_openai_request_parts(&test_model(), chat_req).expect("should serialize");
+		parts.tools.expect("tools must be present")
+	}
+
+	/// `description` is optional in the OpenAI function schema. Serialising it
+	/// as an explicit `null` is not the same as omitting it: providers that
+	/// validate the payload reject a null where a string is expected.
+	#[test]
+	fn test_tool_without_description_omits_the_key_rather_than_emitting_null() {
+		let tools = serialised_tools(vec![tool_named("get_weather")]);
+		let function = &tools[0]["function"];
+
+		assert!(
+			function.get("description").is_none(),
+			"absent description must be omitted, got: {function}"
+		);
+		assert_eq!(function["name"], "get_weather");
+	}
+
+	#[test]
+	fn test_tool_with_description_still_serialises_it() {
+		let tools = serialised_tools(vec![tool_named("get_weather").with_description("Get weather")]);
+		assert_eq!(tools[0]["function"]["description"], "Get weather");
+	}
+
+	/// `parameters` is required to be a schema object. A tool declared without
+	/// one previously serialised `"parameters": null`, which is not a schema.
+	#[test]
+	fn test_tool_without_schema_falls_back_to_the_empty_object_schema() {
+		let tools = serialised_tools(vec![tool_named("no_args")]);
+		let parameters = &tools[0]["function"]["parameters"];
+
+		assert!(!parameters.is_null(), "parameters must never serialise as null");
+		assert_eq!(parameters["type"], "object");
+	}
+
+	#[test]
+	fn test_tool_with_schema_passes_it_through_verbatim() {
+		let schema = json!({
+			"type": "object",
+			"properties": {"city": {"type": "string"}},
+			"required": ["city"],
+		});
+		let tools = serialised_tools(vec![tool_named("get_weather").with_schema(schema.clone())]);
+		assert_eq!(tools[0]["function"]["parameters"], schema);
+	}
+
+	/// `strict` is deliberately unchanged: `false` is the documented default and
+	/// altering it would change structured-output behaviour for every adapter.
+	#[test]
+	fn test_strict_flag_is_preserved() {
+		let tools = serialised_tools(vec![tool_named("get_weather")]);
+		assert_eq!(tools[0]["function"]["strict"], false);
+		assert_eq!(tools[0]["type"], "function");
 	}
 
 	/// When an assistant message carries reasoning_content, it must appear
