@@ -6,9 +6,40 @@ use crate::chat::{ChatOptionsSet, StopReason, ToolCall};
 use crate::webc::{Event, EventSourceStream};
 use crate::{Error, ModelIden, Result};
 use serde_json::Value;
+use std::collections::HashMap;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use value_ext::JsonValueExt;
+
+/// Resolve streaming tool-call identity for one `index`.
+///
+/// OpenAI later deltas omit `id`/`name` and correlate by `index`. Some
+/// vendors (DashScope/Qwen) send `"id": ""` instead of omitting the field.
+/// Empty string is a successful `x_take`, so it must be treated as absent
+/// and the previously captured id/name for this index reused. Synthesising
+/// `call_{index}` is only the fallback when no real id has been seen yet.
+fn resolve_tool_identity(
+	map: &mut HashMap<u32, (String, String)>,
+	index: u32,
+	raw_id: Option<String>,
+	raw_name: Option<String>,
+) -> (String, String) {
+	let captured = map.get(&index).cloned();
+	let call_id = match raw_id.filter(|s| !s.is_empty()) {
+		Some(id) => id,
+		None => captured
+			.as_ref()
+			.map(|(id, _)| id.clone())
+			.filter(|s| !s.is_empty())
+			.unwrap_or_else(|| format!("call_{index}")),
+	};
+	let fn_name = match raw_name.filter(|s| !s.is_empty()) {
+		Some(name) => name,
+		None => captured.as_ref().map(|(_, name)| name.clone()).unwrap_or_default(),
+	};
+	map.insert(index, (call_id.clone(), fn_name.clone()));
+	(call_id, fn_name)
+}
 
 fn take_stream_error(message_data: &mut Value, model_iden: &ModelIden) -> Option<Error> {
 	let error_body = message_data.x_take::<Value>("error").ok()?;
@@ -26,6 +57,10 @@ pub struct OpenAIStreamer {
 	/// Flag to prevent polling the EventSource after a MessageStop event
 	done: bool,
 	captured_data: StreamerCapturedData,
+	/// Per-index `(call_id, fn_name)` captured from the first chunk that had
+	/// them. Always updated, even when `capture_tool_calls` is false, so
+	/// later empty-id argument deltas reuse the real id (proxy path).
+	tool_id_by_index: HashMap<u32, (String, String)>,
 }
 
 impl OpenAIStreamer {
@@ -35,6 +70,7 @@ impl OpenAIStreamer {
 			done: false,
 			options: StreamerOptions::new(model_iden, options_set),
 			captured_data: Default::default(),
+			tool_id_by_index: HashMap::new(),
 		}
 	}
 
@@ -273,11 +309,11 @@ impl futures::Stream for OpenAIStreamer {
 									tool_call_obj.x_take::<u32>("index"),
 									tool_call_obj.x_take::<Value>("function"),
 								) {
-									let call_id = tool_call_obj
-										.x_take::<String>("id")
-										.unwrap_or_else(|_| format!("call_{index}"));
-									let fn_name = function.x_take::<String>("name").unwrap_or_default();
+									let raw_id = tool_call_obj.x_take::<String>("id").ok().filter(|s| !s.is_empty());
+									let raw_name = function.x_take::<String>("name").ok().filter(|s| !s.is_empty());
 									let arguments = function.x_take::<String>("arguments").unwrap_or_default();
+									let (call_id, fn_name) =
+										resolve_tool_identity(&mut self.tool_id_by_index, index, raw_id, raw_name);
 
 									let tool_call = self.capture_tool_call(index as usize, call_id, fn_name, arguments);
 
@@ -399,5 +435,56 @@ mod tests {
 			"choices": [{"delta": {"content": "hi"}}]
 		});
 		assert!(take_stream_error(&mut message_data, &test_model()).is_none());
+	}
+
+	#[test]
+	fn empty_id_on_second_chunk_reuses_captured_id() {
+		let mut map = HashMap::new();
+		let (id0, name0) = resolve_tool_identity(
+			&mut map,
+			0,
+			Some("call_abc".into()),
+			Some("run_terminal_command".into()),
+		);
+		assert_eq!(id0, "call_abc");
+		assert_eq!(name0, "run_terminal_command");
+
+		let (id1, name1) = resolve_tool_identity(&mut map, 0, Some(String::new()), None);
+		assert_eq!(id1, "call_abc");
+		assert_eq!(name1, "run_terminal_command");
+	}
+
+	#[test]
+	fn missing_id_on_second_chunk_reuses_captured_id() {
+		let mut map = HashMap::new();
+		resolve_tool_identity(
+			&mut map,
+			0,
+			Some("call_abc".into()),
+			Some("run_terminal_command".into()),
+		);
+		let (id1, name1) = resolve_tool_identity(&mut map, 0, None, None);
+		assert_eq!(id1, "call_abc");
+		assert_eq!(name1, "run_terminal_command");
+	}
+
+	#[test]
+	fn parallel_indices_stay_separate() {
+		let mut map = HashMap::new();
+		let (a, _) = resolve_tool_identity(&mut map, 0, Some("call_a".into()), Some("fn_a".into()));
+		let (b, _) = resolve_tool_identity(&mut map, 1, Some("call_b".into()), Some("fn_b".into()));
+		assert_eq!(a, "call_a");
+		assert_eq!(b, "call_b");
+		let (a2, n2) = resolve_tool_identity(&mut map, 0, Some(String::new()), None);
+		assert_eq!(a2, "call_a");
+		assert_eq!(n2, "fn_a");
+	}
+
+	#[test]
+	fn first_chunk_empty_id_synthesises_call_index() {
+		let mut map = HashMap::new();
+		let (id, name) = resolve_tool_identity(&mut map, 0, Some(String::new()), Some("fn".into()));
+		assert_eq!(id, "call_0");
+		assert_eq!(name, "fn");
 	}
 }
