@@ -224,11 +224,12 @@ impl futures::Stream for OpenAIStreamer {
 										tool_call_obj.x_take::<u32>("index"),
 										tool_call_obj.x_take::<Value>("function"),
 									) {
-										let call_id = tool_call_obj
-											.x_take::<String>("id")
-											.unwrap_or_else(|_| format!("call_{index}"));
-										let fn_name = function.x_take::<String>("name").unwrap_or_default();
+										let raw_id =
+											tool_call_obj.x_take::<String>("id").ok().filter(|s| !s.is_empty());
+										let raw_name = function.x_take::<String>("name").ok().filter(|s| !s.is_empty());
 										let arguments = function.x_take::<String>("arguments").unwrap_or_default();
+										let (call_id, fn_name) =
+											resolve_tool_identity(&mut self.tool_id_by_index, index, raw_id, raw_name);
 
 										self.capture_tool_call(index as usize, call_id, fn_name, arguments);
 									}
